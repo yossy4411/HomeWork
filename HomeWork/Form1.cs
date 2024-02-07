@@ -210,34 +210,30 @@ namespace HomeWork
             switch (schedule.Type)
             {
                 case "homework":
-                    tableLayoutPanel.AddRow(0, ["タイトル", schedule.Title]);
-                    tableLayoutPanel.AddRow(1, ["配布日", schedule.Start.ToString("f")]);
-                    tableLayoutPanel.AddRow(2, ["提出日", schedule.End.ToString("f")]);
-                    if(schedule.Description!=null) tableLayoutPanel.AddRow(3, ["メモ", schedule.Description]);
+                    tableLayoutPanel.AddRow(["タイトル", schedule.Title]);
+                    tableLayoutPanel.AddRow(["配布日", schedule.Start.ToString("f")]);
+                    tableLayoutPanel.AddRow(["提出日", schedule.End.ToString("f")]);
+                    if(schedule.Description!=null) tableLayoutPanel.AddRow(["メモ", schedule.Description]);
                     break;
                 default:
                     break;
             }
             
         }
-        private void nextMonth_Click(object sender, EventArgs e)
+        private void NextMonth_Click(object sender, EventArgs e)
         {
             scroll += 1;
             var date = DateTime.Now.AddMonths((int)scroll);
             SetDate(date);
         }
 
-        private void previousMonth_Click(object sender, EventArgs e)
+        private void PreviousMonth_Click(object sender, EventArgs e)
         {
             scroll -= 1;
             var date = DateTime.Now.AddMonths((int)scroll);
             SetDate(date);
         }
 
-        private void tab_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void Panel2_Paint(object sender, PaintEventArgs e)
         {
@@ -255,14 +251,6 @@ namespace HomeWork
             }
         }
 
-        private void DateTimePicker1_ValueChanged(object sender, EventArgs e)
-        {
 
-        }
-
-        private void Panel2_Paint_1(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }

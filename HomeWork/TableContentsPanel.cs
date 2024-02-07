@@ -17,5 +17,10 @@ namespace HomeWork
                 Controls.Add(new Label() { Text = control[i], AutoSize = true, MaximumSize = new((int)ColumnStyles[i].Width,0) }, i, row);
             }
         }
+        public void AddRow( string[] control)
+        {
+            AddRow(RowCount, control);
+            RowCount++;
+        }
     }
 }

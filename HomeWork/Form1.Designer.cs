@@ -55,7 +55,6 @@ namespace HomeWork
             tab.SelectedIndex = 0;
             tab.Size = new Size(357, 549);
             tab.TabIndex = 1;
-            tab.SelectedIndexChanged += tab_SelectedIndexChanged;
             // 
             // calendar
             // 
@@ -100,7 +99,7 @@ namespace HomeWork
             nextMonth.SizeMode = PictureBoxSizeMode.Zoom;
             nextMonth.TabIndex = 7;
             nextMonth.TabStop = false;
-            nextMonth.Click += nextMonth_Click;
+            nextMonth.Click += NextMonth_Click;
             // 
             // previousMonth
             // 
@@ -111,7 +110,7 @@ namespace HomeWork
             previousMonth.SizeMode = PictureBoxSizeMode.Zoom;
             previousMonth.TabIndex = 6;
             previousMonth.TabStop = false;
-            previousMonth.Click += previousMonth_Click;
+            previousMonth.Click += PreviousMonth_Click;
             // 
             // year
             // 
