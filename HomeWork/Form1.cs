@@ -3,13 +3,14 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Reflection;
 using HomeWork.schedule;
+using HomeWork.Views;
 
 namespace HomeWork
 {
     public partial class Form1 : Form
     {
         private readonly Schedules schedules = ResetF();
-        private readonly FontFamily fontFamily;
+        private readonly FontFamily fontFamily = FontFamily.GenericSansSerif;
         private float scroll = 0;
         private int month;
         private List<int>[]? displayingSchedules;
@@ -97,7 +98,7 @@ namespace HomeWork
                 }
             }
             detailed.HorizontalScroll.Enabled = false;
-          
+
             calendarGroup.MouseWheel += Calendar_MouseWheel;
         }
         private void Calendar_MouseWheel(object? sender, MouseEventArgs e)
@@ -176,12 +177,12 @@ namespace HomeWork
                         AutoEllipsis = true,
                         AutoSize = true
                     });
-                    if (schedule.detail != null)
+                    if (schedule.Detail != null)
                     {
                         container.Controls.Add(new Label()
                         {
                             Font = new Font(fontFamily, 7f, FontStyle.Regular),
-                            Text = "提出物 x" + schedule.detail.Length,
+                            Text = "提出物 x" + schedule.Detail.Length,
                             ForeColor = schedule.GetTextColor(),
                             AutoEllipsis = true,
                             AutoSize = true
@@ -196,29 +197,59 @@ namespace HomeWork
 
         private void AddTab(Schedule schedule)
         {
-            TableContentsPanel tableLayoutPanel = new () { Location = new(0,30), AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly};
-            TabPage tabPage = new() { Text = schedule.Title, AutoScroll = true }; 
-            tab.TabPages.Add(tabPage);
+            TableContentsPanel tableLayoutPanel = new() { Location = new(0, 30), AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly };
+            TabPage tabPage = new() { Text = schedule.Title, AutoScroll = true };
+            tab.TabPages.Insert(0, tabPage);
+            tab.SelectedTab = tabPage;
             tabPage.HorizontalScroll.Enabled = false;
             Button button = new() { Text = "close", AutoSize = true };
             button.Click += (sender, e) => { tabPage.Dispose(); tab.TabPages.Remove(tabPage); };
-            
+
             tabPage.Controls.Add(button);
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.3f));
-            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f-24));
             tabPage.Controls.Add(tableLayoutPanel);
             switch (schedule.Type)
             {
                 case "homework":
-                    tableLayoutPanel.AddRow(["タイトル", schedule.Title]);
-                    tableLayoutPanel.AddRow(["配布日", schedule.Start.ToString("f")]);
-                    tableLayoutPanel.AddRow(["提出日", schedule.End.ToString("f")]);
-                    if(schedule.Description!=null) tableLayoutPanel.AddRow(["メモ", schedule.Description]);
+                    tableLayoutPanel.AddTextRow("タイトル", schedule.Title);
+                    tableLayoutPanel.AddTextRow("配布日", schedule.Start.ToString("f"));
+                    tableLayoutPanel.AddTextRow("提出日", schedule.End.ToString("f"));
+                    if (schedule.Description != null) tableLayoutPanel.AddTextRow("メモ", schedule.Description);
+                    {
+                        Subject? subj = schedules.LoadSubject(schedule.Subject);
+                        tableLayoutPanel.AddTextRow("教科", subj != null ? subj.Name : "?");
+                    }
+                    FlowLayoutPanel accordion = new()
+                    {
+                        FlowDirection = FlowDirection.TopDown,
+                        BackColor = Color.Tan,
+                        Width = tableLayoutPanel.ContWidth,
+                        AutoSize = true,
+                        AutoSizeMode = AutoSizeMode.GrowOnly,
+                        WrapContents = false
+                    };
+                    tableLayoutPanel.AddCustomRow("提出物", accordion);
+                    foreach(Submission submission in schedule.Detail)
+                    {
+
+                        TitledPanel submissionView = new(new TableContentsPanel())
+                        {
+                            Text = submission.Name,
+                            Margin =  new(0),
+                            MinimumSize = new(tableLayoutPanel.ContWidth,25),
+                            AutoSizeMode = AutoSizeMode.GrowOnly,
+                            AutoSize = true
+                            
+                        };
+                        accordion.Controls.Add(submissionView);
+                        submissionView.AutoSize = true;
+                    }
                     break;
                 default:
                     break;
             }
-            
+
         }
         private void NextMonth_Click(object sender, EventArgs e)
         {
@@ -235,7 +266,7 @@ namespace HomeWork
         }
 
 
-        private void Panel2_Paint(object sender, PaintEventArgs e)
+        private void DetailTime_Paint(object sender, PaintEventArgs e)
         {
             using Graphics g = e.Graphics;
             {
@@ -250,7 +281,6 @@ namespace HomeWork
                 }
             }
         }
-
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using HomeWork.Views;
 namespace HomeWork
 {
     partial class Form1
@@ -30,6 +31,8 @@ namespace HomeWork
         private void InitializeComponent()
         {
             tab = new TabControl();
+            tabPage1 = new TabPage();
+            titledPanel1 = new TitledPanel();
             calendar = new TableLayoutPanel();
             panel1 = new Panel();
             nextMonth = new PictureBox();
@@ -39,7 +42,9 @@ namespace HomeWork
             detailed = new Panel();
             calendarGroup = new GroupBox();
             detailGroup = new GroupBox();
-            leftPanel = new ScrollablePanel();
+            leftPanel = new FlowLayoutPanel();
+            tab.SuspendLayout();
+            tabPage1.SuspendLayout();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nextMonth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)previousMonth).BeginInit();
@@ -50,11 +55,31 @@ namespace HomeWork
             // 
             // tab
             // 
+            tab.Controls.Add(tabPage1);
             tab.Location = new Point(654, 12);
             tab.Name = "tab";
             tab.SelectedIndex = 0;
             tab.Size = new Size(357, 549);
             tab.TabIndex = 1;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(titledPanel1);
+            tabPage1.Location = new Point(4, 29);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(349, 516);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // titledPanel1
+            // 
+            titledPanel1.AutoSize = true;
+            titledPanel1.Location = new Point(157, 215);
+            titledPanel1.Name = "titledPanel1";
+            titledPanel1.Size = new Size(97, 23);
+            titledPanel1.TabIndex = 0;
             // 
             // calendar
             // 
@@ -128,7 +153,7 @@ namespace HomeWork
             detailTime.Name = "detailTime";
             detailTime.Size = new Size(597, 22);
             detailTime.TabIndex = 5;
-            detailTime.Paint += Panel2_Paint;
+            detailTime.Paint += DetailTime_Paint;
             // 
             // detailed
             // 
@@ -143,7 +168,6 @@ namespace HomeWork
             // 
             calendarGroup.Controls.Add(panel1);
             calendarGroup.Controls.Add(calendar);
-            calendarGroup.Dock = DockStyle.Fill;
             calendarGroup.Location = new Point(3, 3);
             calendarGroup.Name = "calendarGroup";
             calendarGroup.Size = new Size(609, 343);
@@ -166,15 +190,12 @@ namespace HomeWork
             // leftPanel
             // 
             leftPanel.AutoScroll = true;
-            leftPanel.CanScroll = true;
             leftPanel.Controls.Add(calendarGroup);
             leftPanel.Controls.Add(detailGroup);
-            leftPanel.FlowDirection = FlowDirection.TopDown;
             leftPanel.Location = new Point(12, 12);
             leftPanel.Name = "leftPanel";
             leftPanel.Size = new Size(636, 549);
-            leftPanel.TabIndex = 11;
-            leftPanel.WrapContents = false;
+            leftPanel.TabIndex = 2;
             // 
             // Form1
             // 
@@ -186,6 +207,9 @@ namespace HomeWork
             Name = "Form1";
             Text = "HomeWork";
             Load += Form1_Load_1;
+            tab.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nextMonth).EndInit();
@@ -207,7 +231,8 @@ namespace HomeWork
         private Panel detailed;
         private GroupBox calendarGroup;
         private GroupBox detailGroup;
-        private ScrollablePanel leftPanel;
-        private ScrollablePanel scrollablePanel1;
+        private FlowLayoutPanel leftPanel;
+        private TabPage tabPage1;
+        private TitledPanel titledPanel1;
     }
 }

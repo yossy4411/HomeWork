@@ -64,7 +64,7 @@ namespace HomeWork.schedule
     public class Subject
     {
         public string? Id { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
     public class Note
     {
@@ -82,10 +82,10 @@ namespace HomeWork.schedule
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public string? Description { get; set; }
-        public string? Subject { get; set; }
+        public string Subject { get; set; } = string.Empty;
         public Color Color { get; set; }
         public Color GetTextColor() => GetContrastColor(Color);
-        public Submission[]? detail { get; set; }
+        public Submission[] Detail { get; set; } = [];
 
         public static Color GetContrastColor(Color originalColor)
         {
@@ -111,7 +111,7 @@ namespace HomeWork.schedule
     }
     public class Submission
     {
-        public string? Name { get; set; }
+        public string Name { get; set; } = "提出物？";
         public string? Description { get; set; }
         public string? Category {  get; set; }
         public string? Id { get; set; }
