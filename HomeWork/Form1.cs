@@ -405,7 +405,7 @@ namespace HomeWork
                 tableLayoutPanel.AddCustomRow("種類", box, true);
             }
 
-            tableLayoutPanel.AddTextInput("タイトル", @"新しい予定");
+            tableLayoutPanel.AddTextInput("タイトル", "新しい予定");
             tableLayoutPanel.AddTextInput("説明", field: true);
             ComboBox subjBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
             subjBox.Items.AddRange(schedules.Subjects);
