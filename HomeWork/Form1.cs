@@ -1,4 +1,4 @@
-using System.Diagnostics;
+ï»¿using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms;
@@ -29,7 +29,7 @@ namespace HomeWork
                 ApiKey = "AIzaSyACDT2kmVWYcSNd_yS2xKSBXj71EwA5iNw",
             });
 
-            // ƒJƒŒƒ“ƒ_[ƒCƒxƒ“ƒg‚Ìæ“¾
+            // ã‚«ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¤ãƒ™ãƒ³ãƒˆã®å–å¾—
             holidays = service.Events.List("ja.japanese#holiday@group.v.calendar.google.com").Execute().Items;
             (Font, FontFamily) t = LoadFontFromFile(@"Resources/Font/NotoSansJP-VariableFont_wght.ttf", 8);
             Font = t.Item1;
@@ -47,7 +47,7 @@ namespace HomeWork
                 privateFontCollection.AddFontFile(fontFilePath);
                 FontFamily fontFamily = privateFontCollection.Families[0];
 
-                // ƒtƒHƒ“ƒg‚ğì¬‚µ‚Ä•Ô‚·
+                // ãƒ•ã‚©ãƒ³ãƒˆã‚’ä½œæˆã—ã¦è¿”ã™
                 return (new Font(fontFamily, size), fontFamily);
             }
         }
@@ -78,7 +78,7 @@ namespace HomeWork
         {
             monthDate = DateTime.Now;
             monthDate = new(monthDate.Year, monthDate.Month, 1);
-            year.Text = monthDate.Year + "”N" + monthDate.Month + "Œ";
+            year.Text = monthDate.Year + "å¹´" + monthDate.Month + "æœˆ";
             monthDate = monthDate.AddDays(-(int)monthDate.DayOfWeek);
             displayingSchedules = schedules.GetSchedules(monthDate, monthDate.AddDays(36));
             for (int i = 0; i < 35; i++)
@@ -152,7 +152,7 @@ namespace HomeWork
         private void SetDate(DateTime date)
         {
 
-            year.Text = date.Year + "”N" + date.Month + "Œ";
+            year.Text = date.Year + "å¹´" + date.Month + "æœˆ";
             date = new DateTime(date.Year, date.Month, 1);
             date = date.AddDays(-(int)date.DayOfWeek);
             monthDate = date;
@@ -176,11 +176,11 @@ namespace HomeWork
         {
             detailDate = date;
             float width = detailed.Width - 5;
-            detailGroup.Text = @$"{date:D}i{date:ddd}j‚Ì—\’è";
+            detailGroup.Text = $"{date:D}ï¼ˆ{date:ddd}ï¼‰ã®äºˆå®š";
             foreach (Control control in detailed.Controls) { control.Dispose(); }
-            addSchedule.Items[0] = $"{date:d} ‚É {ScheduleType.Levels[0]} ‚ğ’Ç‰Á";
-            addSchedule.Items[1] = $"{date:d} ‚É {ScheduleType.Levels[1]} ‚ğ’Ç‰Á";
-            addSchedule.Items[2] = $"{date:d} ‚É {ScheduleType.Levels[2]} ‚ğ’Ç‰Á";
+            addSchedule.Items[0] = $"{date:d} ã« {ScheduleType.Levels[0]} ã‚’è¿½åŠ ";
+            addSchedule.Items[1] = $"{date:d} ã« {ScheduleType.Levels[1]} ã‚’è¿½åŠ ";
+            addSchedule.Items[2] = $"{date:d} ã« {ScheduleType.Levels[2]} ã‚’è¿½åŠ ";
 
             detailed.Controls.Clear();
             var holiday = SearchEvent(holidays, date);
@@ -237,7 +237,7 @@ namespace HomeWork
                     container.Controls.Add(new Label()
                     {
                         Font = new Font(fontFamily, 7, FontStyle.Regular),
-                        Text = (schedule.IsFinish(date) ? schedule.IsStartOfDay() ? "¡“ú‚Å" : "¡“úA" + schedule.End.ToShortTimeString() + "‚É" : schedule.End.Date.ToShortDateString() + "‚É") + "I—¹",
+                        Text = (schedule.IsFinish(date) ? schedule.IsStartOfDay() ? "ä»Šæ—¥ã§" : "ä»Šæ—¥ã€" + schedule.End.ToShortTimeString() + "ã«" : schedule.End.Date.ToShortDateString() + "ã«") + "çµ‚äº†",
                         ForeColor = schedule.GetTextColor(),
                         AutoEllipsis = true,
                         AutoSize = true
@@ -247,7 +247,7 @@ namespace HomeWork
                         container.Controls.Add(new Label()
                         {
                             Font = new Font(fontFamily, 7f, FontStyle.Regular),
-                            Text = "’ño•¨ x" + schedule.Detail.Count,
+                            Text = "æå‡ºç‰© x" + schedule.Detail.Count,
                             ForeColor = schedule.GetTextColor(),
                             AutoEllipsis = true,
                             AutoSize = true,
@@ -269,24 +269,24 @@ namespace HomeWork
             tabs.TabPages.Insert(0, tabPage);
             tabs.SelectedTab = tabPage;
             tabPage.HorizontalScroll.Enabled = false;
-            Button button = new() { Text = "•Â‚¶‚é", AutoSize = true };
+            Button button = new() { Text = "é–‰ã˜ã‚‹", AutoSize = true };
             button.Click += (sender, e) => { tabPage.Dispose(); tabs.TabPages.Remove(tabPage); };
 
             tabPage.Controls.Add(button);
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.3f));
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f - 25));
             tabPage.Controls.Add(tableLayoutPanel);
-            tableLayoutPanel.AddTextRow("ƒ^ƒCƒgƒ‹", schedule.Title);
+            tableLayoutPanel.AddTextRow("ã‚¿ã‚¤ãƒˆãƒ«", schedule.Title);
             switch (schedule.Type)
             {
                 case "homework":
 
-                    tableLayoutPanel.AddTextRow("”z•z“ú", schedule.Start.ToString("f"));
-                    tableLayoutPanel.AddTextRow("’ño“ú", schedule.End.ToString("f"));
-                    if (schedule.Description != null) tableLayoutPanel.AddTextRow("ƒƒ‚", schedule.Description);
+                    tableLayoutPanel.AddTextRow("é…å¸ƒæ—¥", schedule.Start.ToString("f"));
+                    tableLayoutPanel.AddTextRow("æå‡ºæ—¥", schedule.End.ToString("f"));
+                    if (schedule.Description != null) tableLayoutPanel.AddTextRow("ãƒ¡ãƒ¢", schedule.Description);
                     {
                         Subject? subj = schedules.LoadSubject(schedule.Subject);
-                        tableLayoutPanel.AddTextRow("‹³‰È", subj != null ? subj.Name : "?");
+                        tableLayoutPanel.AddTextRow("æ•™ç§‘", subj != null ? subj.Name : "?");
                     }
                     FlowLayoutPanel accordion = new()
                     {
@@ -296,7 +296,7 @@ namespace HomeWork
                         AutoSizeMode = AutoSizeMode.GrowOnly,
                         WrapContents = false
                     };
-                    tableLayoutPanel.AddCustomRow("’ño•¨", accordion);
+                    tableLayoutPanel.AddCustomRow("æå‡ºç‰©", accordion);
                     foreach (Submission submission in schedule.Detail)
                     {
                         TableContentsPanel table = new() { AutoSize = true };
@@ -311,24 +311,24 @@ namespace HomeWork
                         table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.32f));
                         table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.68f));
 
-                        table.AddTextRow("ƒ^ƒCƒgƒ‹", submission.Name);
-                        if (submission.Description != null) table.AddTextRow("à–¾", submission.Description);
+                        table.AddTextRow("ã‚¿ã‚¤ãƒˆãƒ«", submission.Name);
+                        if (submission.Description != null) table.AddTextRow("èª¬æ˜", submission.Description);
                         switch (submission.Category)
                         {
                             case "regular":
                                 Note? note = schedules.LoadRegular(submission.Id);
                                 if (note == null)
                                 {
-                                    table.AddTextRow("’ño•¨", $"[{submission.Id}‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½B\n‚±‚ÌID‚Ìƒm[ƒg‚ª‘¶İ‚·‚é‚©Šm”F‚µ‚Ä‚­‚¾‚³‚¢B]");
+                                    table.AddTextRow("æå‡ºç‰©", $"[{submission.Id}ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚\nã“ã®IDã®ãƒãƒ¼ãƒˆãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„ã€‚]");
                                 }
                                 else
                                 {
-                                    table.AddLinkRow("’ño•¨", note.Name ?? "[’ño•¨‚ğ“Ç‚İ‚ß‚Ü‚¹‚ñ‚Å‚µ‚½]", (sender, e) => { Debug.WriteLine("ƒNƒŠƒbƒN‚³‚ê‚Ü‚µ‚½"); });
+                                    table.AddLinkRow("æå‡ºç‰©", note.Name ?? "[æå‡ºç‰©ã‚’èª­ã¿è¾¼ã‚ã¾ã›ã‚“ã§ã—ãŸ]", (sender, e) => { Debug.WriteLine("ã‚¯ãƒªãƒƒã‚¯ã•ã‚Œã¾ã—ãŸ"); });
                                 }
                                 FlowLayoutPanel pages = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true };
                                 pages.Controls.AddRange(submission.PageLabel());
 
-                                table.AddCustomRow("ƒy[ƒW", pages);
+                                table.AddCustomRow("ãƒšãƒ¼ã‚¸", pages);
                                 break;
                             case "irregular":
                                 break;
@@ -337,14 +337,14 @@ namespace HomeWork
                             default:
                                 break;
                         }
-                        table.AddTextRow("ŠÛ•t‚¯", submission.Circling ? "‚ ‚è" : "‚È‚µ");
-                        table.AddTextRow("ŒöŠJƒŒƒxƒ‹", submission.ShareLevel.Name);
+                        table.AddTextRow("ä¸¸ä»˜ã‘", submission.Circling ? "ã‚ã‚Š" : "ãªã—");
+                        table.AddTextRow("å…¬é–‹ãƒ¬ãƒ™ãƒ«", submission.ShareLevel.Name);
                     }
                     break;
                 default:
                     break;
             }
-            tableLayoutPanel.AddTextRow("’ñ‹Ÿ:", $"{schedule.Provided:G} \nby{schedule.Provider ?? "©•ª"}");
+            tableLayoutPanel.AddTextRow("æä¾›:", $"{schedule.Provided:G}é ƒ\nby{schedule.Provider ?? "è‡ªåˆ†"}");
 
         }
         private void NextMonth_Click(object sender, EventArgs e)
@@ -383,12 +383,12 @@ namespace HomeWork
 
             FlowLayoutPanel parent = new() { FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new(0), AutoScroll = true };
             TableContentsPanel tableLayoutPanel = new() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly };
-            TabPage tabPage = new() { Text = @"V‚µ‚¢—\’è" };
+            TabPage tabPage = new() { Text = @"æ–°ã—ã„äºˆå®š" };
             tabPage.Controls.Add(parent);
             tabs.TabPages.Insert(0, tabPage);
             parent.Size = tabPage.Size;
             tabs.SelectedTab = tabPage;
-            Button button = new() { Text = "•Â‚¶‚é", AutoSize = true };
+            Button button = new() { Text = "é–‰ã˜ã‚‹", AutoSize = true };
             parent.HorizontalScroll.Enabled = false;
             parent.HorizontalScroll.Visible = false;
             button.Click += (sender, e) => { tabPage.Dispose(); tabs.TabPages.Remove(tabPage); };
@@ -402,16 +402,16 @@ namespace HomeWork
                 box.Items.AddRange(ScheduleType.Levels);
                 box.SelectedValueChanged += (sender, e) => submission.ScheduleType = ((ScheduleType?)box.SelectedItem) ?? ScheduleType.Levels[0];
                 box.SelectedIndex = addSchedule.SelectedIndex;
-                tableLayoutPanel.AddCustomRow("í—Ş", box, true);
+                tableLayoutPanel.AddCustomRow("ç¨®é¡", box, true);
             }
 
-            tableLayoutPanel.AddTextInput("ƒ^ƒCƒgƒ‹", @"V‚µ‚¢—\’è");
-            tableLayoutPanel.AddTextInput("à–¾", field: true);
+            tableLayoutPanel.AddTextInput("ã‚¿ã‚¤ãƒˆãƒ«", @"æ–°ã—ã„äºˆå®š");
+            tableLayoutPanel.AddTextInput("èª¬æ˜", field: true);
             ComboBox subjBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
             subjBox.Items.AddRange(schedules.Subjects);
-            subjBox.SelectedValueChanged += (sender, e) => submission.Subject = (((Subject?)subjBox.SelectedItem) ?? new Subject() { Name = "–¢w’è", Id = "unknown" }).Id;
+            subjBox.SelectedValueChanged += (sender, e) => submission.Subject = (((Subject?)subjBox.SelectedItem) ?? new Subject() { Name = "æœªæŒ‡å®š", Id = "unknown" }).Id;
             subjBox.SelectedIndex = 0;
-            tableLayoutPanel.AddCustomRow("‹³‰È", subjBox, true);
+            tableLayoutPanel.AddCustomRow("æ•™ç§‘", subjBox, true);
 
 
             {
@@ -425,10 +425,10 @@ namespace HomeWork
 
                 FlowLayoutPanel panel = new() { AutoSize = true };
                 panel.Controls.Add(dateTime);
-                CheckBox box1 = new() { Text = "I“ú" };
+                CheckBox box1 = new() { Text = "çµ‚æ—¥" };
                 box1.CheckedChanged += (sender, e) => dateTime.Format = box1.Checked ? DateTimePickerFormat.Short : DateTimePickerFormat.Custom;
                 panel.Controls.Add(box1);
-                tableLayoutPanel.AddCustomRow("ŠJn", panel, true);
+                tableLayoutPanel.AddCustomRow("é–‹å§‹æ™‚åˆ»", panel, true);
             }
             {
                 DateTimePicker dateTime = new()
@@ -441,10 +441,10 @@ namespace HomeWork
 
                 FlowLayoutPanel panel = new() { AutoSize = true };
                 panel.Controls.Add(dateTime);
-                CheckBox box1 = new() { Text = "I“ú" };
+                CheckBox box1 = new() { Text = "çµ‚æ—¥" };
                 box1.CheckedChanged += (sender, e) => dateTime.Format = box1.Checked ? DateTimePickerFormat.Short : DateTimePickerFormat.Custom;
                 panel.Controls.Add(box1);
-                tableLayoutPanel.AddCustomRow("I—¹", panel, true);
+                tableLayoutPanel.AddCustomRow("çµ‚äº†æ™‚åˆ»", panel, true);
             }
             FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
             parent.Controls.Add(flowLayoutPanel);
@@ -463,10 +463,10 @@ namespace HomeWork
                 AutoSize = true,
                 MinimumSize = new(width - 35, 25),
                 MaximumSize = new(width - 35, 0),
-                Text = "’ño•¨",
+                Text = "æå‡ºç‰©",
             };
             panel.Controls.Add(titledPanel);
-            tableLayoutPanel.AddTextInput("ƒ^ƒCƒgƒ‹", "’ño•¨", eventHandler: new((sender, e) => submission.Name = ((TextBox?)sender)?.Text ?? "’ño•¨"));
+            tableLayoutPanel.AddTextInput("ã‚¿ã‚¤ãƒˆãƒ«", "æå‡ºç‰©", eventHandler: new((sender, e) => submission.Name = ((TextBox?)sender)?.Text ?? "æå‡ºç‰©"));
             FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true };
             ComboBox box = new();
             box.Items.AddRange(SubmissionType.Levels);
@@ -474,13 +474,13 @@ namespace HomeWork
             flowLayoutPanel.Controls.Add(box);
             CheckBox checkBox = new()
             {
-                Text = "ŠÛ•t‚¯",
+                Text = "ä¸¸ä»˜ã‘",
                 Checked = true
             };
             checkBox.CheckedChanged += (sender, e) => submission.Circling = checkBox.Checked;
             
             flowLayoutPanel.Controls.Add(checkBox);
-            tableLayoutPanel.AddCustomRow("í•Ê", flowLayoutPanel, fit: true);
+            tableLayoutPanel.AddCustomRow("ç¨®åˆ¥", flowLayoutPanel, fit: true);
             EventHandler handler = AddRegular(schedule,submission, tableLayoutPanel);
             subjBox.SelectedValueChanged += handler;
         }
@@ -503,7 +503,7 @@ namespace HomeWork
             endPage.ValueChanged += (sender, e) => { if (startPage.Value > endPage.Value) startPage.Value = endPage.Value; toolTip.SetToolTip(endPage, endPage.Value.ToString()); };
             toolTip.SetToolTip(startPage, startPage.Value.ToString());
             toolTip.SetToolTip(endPage, endPage.Value.ToString());
-            tableLayoutPanel.AddCustomRow("’ño•¨", submiBox, fit: true);
+            tableLayoutPanel.AddCustomRow("æå‡ºç‰©", submiBox, fit: true);
             EventHandler hander = new((sender, e) =>
             {
                 submiBox.Items.Clear();
@@ -512,11 +512,11 @@ namespace HomeWork
             });
             {
                 var flow = new FlowLayoutPanel() { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true };
-                tableLayoutPanel.AddCustomRow("ƒy[ƒW", flow, fit: true);
+                tableLayoutPanel.AddCustomRow("ãƒšãƒ¼ã‚¸", flow, fit: true);
                 flow.Controls.Add(startPage);
                 flow.Controls.Add(endPage);
-                Button addButton = new() { Text = "’Ç‰Á‚·‚é", AutoSize = true };
-                Button remButton = new() { Text = "íœ‚·‚é", AutoSize = true };
+                Button addButton = new() { Text = "è¿½åŠ ã™ã‚‹", AutoSize = true };
+                Button remButton = new() { Text = "å‰Šé™¤ã™ã‚‹", AutoSize = true };
                 flow.Controls.Add(addButton);
                 flow.Controls.Add(remButton);
                 ListBox list = new() { Width = tableLayoutPanel.ContWidth - 10 };
