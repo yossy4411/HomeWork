@@ -481,7 +481,7 @@ namespace HomeWork
             
             flowLayoutPanel.Controls.Add(checkBox);
             tableLayoutPanel.AddCustomRow("Ží•Ê", flowLayoutPanel, fit: true);
-            EventHandler handler = AddRegular(schedule, tableLayoutPanel);
+            EventHandler handler = AddRegular(schedule,submission, tableLayoutPanel);
             subjBox.SelectedValueChanged += handler;
         }
 
