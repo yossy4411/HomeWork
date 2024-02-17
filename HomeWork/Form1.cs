@@ -176,7 +176,7 @@ namespace HomeWork
         {
             detailDate = date;
             float width = detailed.Width - 5;
-            detailGroup.Text = $"{date:D}（{date:ddd}）の定";
+            detailGroup.Text = @$"{date:D}（{date:ddd}）の予定";
             foreach (Control control in detailed.Controls) { control.Dispose(); }
             addSchedule.Items[0] = $"{date:d} に {ScheduleType.Levels[0]} を追加";
             addSchedule.Items[1] = $"{date:d} に {ScheduleType.Levels[1]} を追加";
@@ -405,7 +405,7 @@ namespace HomeWork
                 tableLayoutPanel.AddCustomRow("種類", box, true);
             }
 
-            tableLayoutPanel.AddTextInput("タイトル", "新しい予定");
+            tableLayoutPanel.AddTextInput("タイトル", @"新しい予定");
             tableLayoutPanel.AddTextInput("説明", field: true);
             ComboBox subjBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
             subjBox.Items.AddRange(schedules.Subjects);
