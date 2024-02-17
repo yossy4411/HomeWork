@@ -176,7 +176,7 @@ namespace HomeWork
         {
             detailDate = date;
             float width = detailed.Width - 5;
-            detailGroup.Text = $"{date:D}（{date:ddd}）の予定";
+            detailGroup.Text = $"{date:D}（{date:ddd}）の定";
             foreach (Control control in detailed.Controls) { control.Dispose(); }
             addSchedule.Items[0] = $"{date:d} に {ScheduleType.Levels[0]} を追加";
             addSchedule.Items[1] = $"{date:d} に {ScheduleType.Levels[1]} を追加";
