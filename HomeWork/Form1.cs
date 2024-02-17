@@ -383,7 +383,7 @@ namespace HomeWork
 
             FlowLayoutPanel parent = new() { FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new(0), AutoScroll = true };
             TableContentsPanel tableLayoutPanel = new() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly };
-            TabPage tabPage = new() { Text = "êVÇµÇ¢ó\íË" };
+            TabPage tabPage = new() { Text = @"êVÇµÇ¢ó\íË" };
             tabPage.Controls.Add(parent);
             tabs.TabPages.Insert(0, tabPage);
             parent.Size = tabPage.Size;
