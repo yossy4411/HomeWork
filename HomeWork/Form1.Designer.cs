@@ -30,11 +30,10 @@ namespace HomeWork
         /// </summary>
         private void InitializeComponent()
         {
-            tab = new TabControl();
-            tabPage1 = new TabPage();
-            titledPanel1 = new TitledPanel();
+            components = new System.ComponentModel.Container();
+            tabs = new TabControl();
             calendar = new TableLayoutPanel();
-            panel1 = new Panel();
+            calendarHeader = new Panel();
             nextMonth = new PictureBox();
             previousMonth = new PictureBox();
             year = new Label();
@@ -42,44 +41,36 @@ namespace HomeWork
             detailed = new Panel();
             calendarGroup = new GroupBox();
             detailGroup = new GroupBox();
-            leftPanel = new FlowLayoutPanel();
-            tab.SuspendLayout();
-            tabPage1.SuspendLayout();
-            panel1.SuspendLayout();
+            addScheduleButton = new Button();
+            addSchedule = new ComboBox();
+            LeftPanel = new FlowLayoutPanel();
+            menuStrip1 = new MenuStrip();
+            userMenu = new ToolStripMenuItem();
+            userProfileMenu = new ToolStripMenuItem();
+            userPreferencesMenu = new ToolStripMenuItem();
+            FriendsMenu = new ToolStripMenuItem();
+            addFriendMenu = new ToolStripMenuItem();
+            removeFriendMenu = new ToolStripMenuItem();
+            listFriendsMenu = new ToolStripMenuItem();
+            feedbackMenu = new ToolStripMenuItem();
+            sendFeedbackMenu = new ToolStripMenuItem();
+            toolTip = new ToolTip(components);
+            calendarHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nextMonth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)previousMonth).BeginInit();
             calendarGroup.SuspendLayout();
             detailGroup.SuspendLayout();
-            leftPanel.SuspendLayout();
+            LeftPanel.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
-            // tab
+            // tabs
             // 
-            tab.Controls.Add(tabPage1);
-            tab.Location = new Point(654, 12);
-            tab.Name = "tab";
-            tab.SelectedIndex = 0;
-            tab.Size = new Size(357, 549);
-            tab.TabIndex = 1;
-            // 
-            // tabPage1
-            // 
-            tabPage1.Controls.Add(titledPanel1);
-            tabPage1.Location = new Point(4, 29);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(349, 516);
-            tabPage1.TabIndex = 0;
-            tabPage1.Text = "tabPage1";
-            tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // titledPanel1
-            // 
-            titledPanel1.AutoSize = true;
-            titledPanel1.Location = new Point(157, 215);
-            titledPanel1.Name = "titledPanel1";
-            titledPanel1.Size = new Size(97, 23);
-            titledPanel1.TabIndex = 0;
+            tabs.Location = new Point(642, 31);
+            tabs.Name = "tabs";
+            tabs.SelectedIndex = 0;
+            tabs.Size = new Size(380, 530);
+            tabs.TabIndex = 1;
             // 
             // calendar
             // 
@@ -103,17 +94,17 @@ namespace HomeWork
             calendar.Size = new Size(597, 285);
             calendar.TabIndex = 3;
             // 
-            // panel1
+            // calendarHeader
             // 
-            panel1.BackColor = SystemColors.ControlDark;
-            panel1.Controls.Add(nextMonth);
-            panel1.Controls.Add(previousMonth);
-            panel1.Controls.Add(year);
-            panel1.Location = new Point(6, 26);
-            panel1.Margin = new Padding(3, 3, 3, 0);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(597, 26);
-            panel1.TabIndex = 4;
+            calendarHeader.BackColor = SystemColors.ControlDark;
+            calendarHeader.Controls.Add(nextMonth);
+            calendarHeader.Controls.Add(previousMonth);
+            calendarHeader.Controls.Add(year);
+            calendarHeader.Location = new Point(6, 26);
+            calendarHeader.Margin = new Padding(3, 3, 3, 0);
+            calendarHeader.Name = "calendarHeader";
+            calendarHeader.Size = new Size(597, 26);
+            calendarHeader.TabIndex = 4;
             // 
             // nextMonth
             // 
@@ -166,7 +157,7 @@ namespace HomeWork
             // 
             // calendarGroup
             // 
-            calendarGroup.Controls.Add(panel1);
+            calendarGroup.Controls.Add(calendarHeader);
             calendarGroup.Controls.Add(calendar);
             calendarGroup.Location = new Point(3, 3);
             calendarGroup.Name = "calendarGroup";
@@ -178,52 +169,143 @@ namespace HomeWork
             // 
             // detailGroup
             // 
+            detailGroup.Controls.Add(addScheduleButton);
+            detailGroup.Controls.Add(addSchedule);
             detailGroup.Controls.Add(detailTime);
             detailGroup.Controls.Add(detailed);
             detailGroup.Location = new Point(3, 352);
             detailGroup.Name = "detailGroup";
-            detailGroup.Size = new Size(609, 240);
+            detailGroup.Size = new Size(609, 274);
             detailGroup.TabIndex = 9;
             detailGroup.TabStop = false;
             detailGroup.Text = "カレンダーをクリックして予定を表示できます";
             // 
-            // leftPanel
+            // addScheduleButton
             // 
-            leftPanel.AutoScroll = true;
-            leftPanel.Controls.Add(calendarGroup);
-            leftPanel.Controls.Add(detailGroup);
-            leftPanel.Location = new Point(12, 12);
-            leftPanel.Name = "leftPanel";
-            leftPanel.Size = new Size(636, 549);
-            leftPanel.TabIndex = 2;
+            addScheduleButton.Location = new Point(480, 239);
+            addScheduleButton.Name = "addScheduleButton";
+            addScheduleButton.Size = new Size(123, 29);
+            addScheduleButton.TabIndex = 7;
+            addScheduleButton.Text = "追加する";
+            addScheduleButton.UseVisualStyleBackColor = true;
+            addScheduleButton.Click += AddScheduleButton_Click;
+            // 
+            // addSchedule
+            // 
+            addSchedule.FormattingEnabled = true;
+            addSchedule.Items.AddRange(new object[] { "宿題 を追加する", "イベント（期間） を追加する", "イベント（１日間）を追加する" });
+            addSchedule.Location = new Point(6, 240);
+            addSchedule.Name = "addSchedule";
+            addSchedule.Size = new Size(468, 28);
+            addSchedule.TabIndex = 0;
+            // 
+            // LeftPanel
+            // 
+            LeftPanel.AutoScroll = true;
+            LeftPanel.Controls.Add(calendarGroup);
+            LeftPanel.Controls.Add(detailGroup);
+            LeftPanel.Location = new Point(0, 31);
+            LeftPanel.Name = "LeftPanel";
+            LeftPanel.Size = new Size(636, 530);
+            LeftPanel.TabIndex = 2;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.BackColor = SystemColors.Window;
+            menuStrip1.ImageScalingSize = new Size(20, 20);
+            menuStrip1.Items.AddRange(new ToolStripItem[] { userMenu, feedbackMenu });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1022, 28);
+            menuStrip1.TabIndex = 3;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // userMenu
+            // 
+            userMenu.DropDownItems.AddRange(new ToolStripItem[] { userProfileMenu, userPreferencesMenu, FriendsMenu });
+            userMenu.Name = "userMenu";
+            userMenu.Size = new Size(67, 24);
+            userMenu.Text = "ユーザー";
+            // 
+            // userProfileMenu
+            // 
+            userProfileMenu.Name = "userProfileMenu";
+            userProfileMenu.Size = new Size(240, 26);
+            userProfileMenu.Text = "ユーザープロフィールの表示";
+            // 
+            // userPreferencesMenu
+            // 
+            userPreferencesMenu.Name = "userPreferencesMenu";
+            userPreferencesMenu.Size = new Size(240, 26);
+            userPreferencesMenu.Text = "ユーザー設定";
+            // 
+            // FriendsMenu
+            // 
+            FriendsMenu.DropDownItems.AddRange(new ToolStripItem[] { addFriendMenu, removeFriendMenu, listFriendsMenu });
+            FriendsMenu.Name = "FriendsMenu";
+            FriendsMenu.Size = new Size(240, 26);
+            FriendsMenu.Text = "フレンド";
+            // 
+            // addFriendMenu
+            // 
+            addFriendMenu.Name = "addFriendMenu";
+            addFriendMenu.Size = new Size(177, 26);
+            addFriendMenu.Text = "フレンドの追加";
+            // 
+            // removeFriendMenu
+            // 
+            removeFriendMenu.Name = "removeFriendMenu";
+            removeFriendMenu.Size = new Size(177, 26);
+            removeFriendMenu.Text = "フレンドの解除";
+            // 
+            // listFriendsMenu
+            // 
+            listFriendsMenu.Name = "listFriendsMenu";
+            listFriendsMenu.Size = new Size(177, 26);
+            listFriendsMenu.Text = "フレンド一覧";
+            // 
+            // feedbackMenu
+            // 
+            feedbackMenu.DropDownItems.AddRange(new ToolStripItem[] { sendFeedbackMenu });
+            feedbackMenu.Name = "feedbackMenu";
+            feedbackMenu.Size = new Size(96, 24);
+            feedbackMenu.Text = "フィードバック";
+            // 
+            // sendFeedbackMenu
+            // 
+            sendFeedbackMenu.Name = "sendFeedbackMenu";
+            sendFeedbackMenu.Size = new Size(229, 26);
+            sendFeedbackMenu.Text = "フィードバックを送信する";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1023, 573);
-            Controls.Add(leftPanel);
-            Controls.Add(tab);
+            ClientSize = new Size(1022, 573);
+            Controls.Add(LeftPanel);
+            Controls.Add(tabs);
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "HomeWork";
             Load += Form1_Load_1;
-            tab.ResumeLayout(false);
-            tabPage1.ResumeLayout(false);
-            tabPage1.PerformLayout();
-            panel1.ResumeLayout(false);
-            panel1.PerformLayout();
+            calendarHeader.ResumeLayout(false);
+            calendarHeader.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nextMonth).EndInit();
             ((System.ComponentModel.ISupportInitialize)previousMonth).EndInit();
             calendarGroup.ResumeLayout(false);
             detailGroup.ResumeLayout(false);
-            leftPanel.ResumeLayout(false);
+            LeftPanel.ResumeLayout(false);
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
-        private TabControl tab;
+        private TabControl tabs;
         private TableLayoutPanel calendar;
-        private Panel panel1;
+        private Panel calendarHeader;
         private PictureBox previousMonth;
         private Label year;
         private PictureBox nextMonth;
@@ -231,8 +313,19 @@ namespace HomeWork
         private Panel detailed;
         private GroupBox calendarGroup;
         private GroupBox detailGroup;
-        private FlowLayoutPanel leftPanel;
-        private TabPage tabPage1;
-        private TitledPanel titledPanel1;
+        private FlowLayoutPanel LeftPanel;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem userMenu;
+        private ToolStripMenuItem userProfileMenu;
+        private ToolStripMenuItem userPreferencesMenu;
+        private ToolStripMenuItem FriendsMenu;
+        private ToolStripMenuItem addFriendMenu;
+        private ToolStripMenuItem removeFriendMenu;
+        private ToolStripMenuItem listFriendsMenu;
+        private ToolStripMenuItem feedbackMenu;
+        private ToolStripMenuItem sendFeedbackMenu;
+        private ComboBox addSchedule;
+        private Button addScheduleButton;
+        private ToolTip toolTip;
     }
 }

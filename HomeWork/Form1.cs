@@ -1,7 +1,10 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
-using System.Reflection;
+using System.Windows.Forms;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Calendar.v3.Data;
+using Google.Apis.Services;
 using HomeWork.schedule;
 using HomeWork.Views;
 
@@ -9,18 +12,29 @@ namespace HomeWork
 {
     public partial class Form1 : Form
     {
-        private readonly Schedules schedules = ResetF();
+        private readonly SchedulesObject schedules = ResetF();
         private readonly FontFamily fontFamily = FontFamily.GenericSansSerif;
+        private readonly IList<Event> holidays;
         private float scroll = 0;
         private int month;
+        private DateTime monthDate;
         private List<int>[]? displayingSchedules;
+        private DateTime? detailDate = null;
+
         public Form1()
         {
             InitializeComponent();
+            var service = new CalendarService(new BaseClientService.Initializer()
+            {
+                ApiKey = "AIzaSyACDT2kmVWYcSNd_yS2xKSBXj71EwA5iNw",
+            });
 
+            // カレンダーイベントの取得
+            holidays = service.Events.List("ja.japanese#holiday@group.v.calendar.google.com").Execute().Items;
             (Font, FontFamily) t = LoadFontFromFile(@"Resources/Font/NotoSansJP-VariableFont_wght.ttf", 8);
             Font = t.Item1;
             fontFamily = t.Item2;
+            menuStrip1.Font = Font;
         }
 
 
@@ -37,70 +51,91 @@ namespace HomeWork
                 return (new Font(fontFamily, size), fontFamily);
             }
         }
-        private static Schedules ResetF()
+        private static SchedulesObject ResetF()
         {
             string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            Schedules? schedules = Schedules.LoadJson(Path.Combine(home, "HWCalendar", "schedules.json"));
-            return schedules ?? new Schedules();
+            SchedulesObject? schedules = SchedulesObject.LoadJson(Path.Combine(home, "HWCalendar", "schedules.json"));
+            return schedules ?? new SchedulesObject();
+        }
+        private static Event? SearchEvent(IList<Event> events, DateTime date)
+        {
+            foreach (var event1 in events)
+            {
+                if (event1.Start.Date == date.Date.ToString("yyyy-MM-dd")) return event1;
+            }
+            return null;
         }
 
         public void Form1_Load_1(object sender, EventArgs e)
         {
-            {
-                DateTime date = new DateTime(2023, 12, 1);
-                year.Text = date.Year + "年" + date.Month + "月";
-                date = date.AddDays(-(int)date.DayOfWeek);
-                displayingSchedules = schedules.GetSchedules(date, date.AddDays(36));
-                for (int i = 0; i < 35; i++)
-                {
-                    var picture = new PictureBox() { Location = new Point(-5, 15) };
-                    Panel flowLayoutPanel = new() { Padding = new Padding(0), Margin = new Padding(0) };
-
-                    flowLayoutPanel.Controls.Add(new Label() { Text = date.AddDays(i).Day.ToString(), AutoSize = true });
-                    flowLayoutPanel.Controls.Add(picture);
-                    calendar.Controls.Add(flowLayoutPanel, i % 7, i / 7);
-                    int index = i;
-
-
-                    picture.Paint += (obj, e) =>
-                    {
-                        if (displayingSchedules[index] != null)
-                        {
-                            {
-                                int p = 0;
-                                for (int i1 = 0; i1 < displayingSchedules[index].Count; i1++)
-                                {
-
-                                    var schedule = schedules.schedules[displayingSchedules[index][i1]];
-                                    using Pen pen = new(schedule.Color, 6);
-
-                                    using GraphicsPath path = new();
-                                    path.AddLine(0, 10 + 6 * i1, 2, 10 + 6 * i1);
-                                    if (displayingSchedules[index + 1] != null && displayingSchedules[index + 1].Contains(displayingSchedules[index][i1]))
-                                    {
-                                        path.AddLine(2, 10 + 6 * i1, picture.Width, 10 + 6 * displayingSchedules[index + 1].IndexOf(displayingSchedules[index][i1]));
-                                        p++;
-                                    }
-                                    else
-                                    {
-                                        path.AddLine(2, 10 + 6 * i1, picture.Width, 10 + 6 * p);
-                                    }
-
-
-                                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                                    e.Graphics.DrawPath(pen, path);
-
-                                }
-                            }
-                        }
-                    };
-                    picture.Click += (sender, e) => Detail(displayingSchedules[index], date.AddDays(index));
-                }
-            }
+            DrawCalendar();
             detailed.HorizontalScroll.Enabled = false;
-
+            addSchedule.DropDownStyle = ComboBoxStyle.DropDownList;
+            addSchedule.SelectedIndex = 0;
             calendarGroup.MouseWheel += Calendar_MouseWheel;
         }
+        private void DrawCalendar()
+        {
+            monthDate = DateTime.Now;
+            monthDate = new(monthDate.Year, monthDate.Month, 1);
+            year.Text = monthDate.Year + "年" + monthDate.Month + "月";
+            monthDate = monthDate.AddDays(-(int)monthDate.DayOfWeek);
+            displayingSchedules = schedules.GetSchedules(monthDate, monthDate.AddDays(36));
+            for (int i = 0; i < 35; i++)
+            {
+                var picture = new PictureBox() { Location = new Point(-5, 15) };
+                Panel flowLayoutPanel = new() { Padding = new Padding(0), Margin = new Padding(0) };
+                var today = monthDate.AddDays(i);
+                Event? holiday = SearchEvent(holidays, today);
+                flowLayoutPanel.Controls.Add(new Label() { Text = today.Day.ToString(), AutoSize = true, ForeColor = DayColor(today, holiday) });
+
+                flowLayoutPanel.Controls.Add(new Label() { Text = holiday?.Summary, AutoSize = true, Location = new(24, 0), ForeColor = Color.Red, Font = new(fontFamily, 4.5f), MaximumSize = new(picture.Width - 30, 0) });
+                flowLayoutPanel.Controls.Add(picture);
+                calendar.Controls.Add(flowLayoutPanel, i % 7, i / 7);
+                int index = i;
+
+
+                picture.Paint += (obj, e) =>
+                {
+                    if (displayingSchedules[index] != null)
+                    {
+                        {
+                            int p = 0;
+                            for (int i1 = 0; i1 < displayingSchedules[index].Count; i1++)
+                            {
+
+                                var schedule = schedules.Schedules[displayingSchedules[index][i1]];
+                                using Pen pen = new(schedule.Color, 6);
+
+                                using GraphicsPath path = new();
+                                path.AddLine(0, 10 + 6 * i1, 2, 10 + 6 * i1);
+                                if (displayingSchedules[index + 1] != null && displayingSchedules[index + 1].Contains(displayingSchedules[index][i1]))
+                                {
+                                    path.AddLine(2, 10 + 6 * i1, picture.Width, 10 + 6 * displayingSchedules[index + 1].IndexOf(displayingSchedules[index][i1]));
+                                    p++;
+                                }
+                                else
+                                {
+                                    path.AddLine(2, 10 + 6 * i1, picture.Width, 10 + 6 * p);
+                                }
+
+
+                                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                                e.Graphics.DrawPath(pen, path);
+
+                            }
+                        }
+                    }
+                };
+                picture.Click += (sender, e) => Detail(displayingSchedules[index], monthDate.AddDays(index));
+            }
+        }
+
+        private static Color DayColor(DateTime today, Event? holiday)
+        {
+            return holiday != null || today.DayOfWeek == DayOfWeek.Sunday ? Color.Red : today.DayOfWeek == DayOfWeek.Saturday ? Color.Blue : Color.Black;
+        }
+
         private void Calendar_MouseWheel(object? sender, MouseEventArgs e)
         {
             ((HandledMouseEventArgs)e).Handled = true;
@@ -116,33 +151,62 @@ namespace HomeWork
 
         private void SetDate(DateTime date)
         {
+
             year.Text = date.Year + "年" + date.Month + "月";
             date = new DateTime(date.Year, date.Month, 1);
             date = date.AddDays(-(int)date.DayOfWeek);
+            monthDate = date;
             displayingSchedules = schedules.GetSchedules(date, date.AddDays(36));
             for (int i = 0; i < 35; i++)
             {
                 Panel? flowLayoutPanel = (Panel?)calendar.GetControlFromPosition(i % 7, i / 7);
                 if (flowLayoutPanel != null)
                 {
-                    ((Label)flowLayoutPanel.Controls[0]).Text = date.AddDays(i).Day.ToString();
-                    flowLayoutPanel.Controls[1].Invalidate();
+                    var today = date.AddDays(i);
+                    Event? holiday = SearchEvent(holidays, today);
+                    ((Label)flowLayoutPanel.Controls[0]).Text = today.Day.ToString();
+                    ((Label)flowLayoutPanel.Controls[0]).ForeColor = DayColor(today, holiday);
+                    ((Label)flowLayoutPanel.Controls[1]).Text = holiday?.Summary;
+                    flowLayoutPanel.Controls[2].Invalidate();
                 }
             }
-
         }
 
         private void Detail(List<int> ints, DateTime date)
         {
+            detailDate = date;
             float width = detailed.Width - 5;
-            detailGroup.Text = $"{date.Year}年{date.Month}月{date.Day}日（{new string[] { "日", "月", "火", "水", "木", "金", "土" }[(int)date.DayOfWeek]}）の予定";
+            detailGroup.Text = $"{date:D}（{date:ddd}）の予定";
             foreach (Control control in detailed.Controls) { control.Dispose(); }
+            addSchedule.Items[0] = $"{date:d} に {ScheduleType.Levels[0]} を追加";
+            addSchedule.Items[1] = $"{date:d} に {ScheduleType.Levels[1]} を追加";
+            addSchedule.Items[2] = $"{date:d} に {ScheduleType.Levels[2]} を追加";
+
             detailed.Controls.Clear();
+            var holiday = SearchEvent(holidays, date);
+            int f = 0;
+            if (holiday != null)
+            {
+
+                Label container = new()
+                {
+                    Size = new Size((int)width, 30),
+                    BackColor = Color.Red,
+                    Font = new Font(fontFamily, 9, FontStyle.Bold),
+                    Text = holiday.Summary,
+                    Location = new Point(detailed.Margin.Left, 0),
+                    ForeColor = Color.White,
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+
+                f++;
+                detailed.Controls.Add(container);
+            }
             if (ints != null)
             {
                 for (int i = 0; i < ints.Count; i++)
                 {
-                    var schedule = schedules.schedules[ints[i]];
+                    var schedule = schedules.Schedules[ints[i]];
                     FlowLayoutPanel container = new()
                     {
                         FlowDirection = FlowDirection.LeftToRight,
@@ -150,7 +214,7 @@ namespace HomeWork
                         WrapContents = false,
                         AutoSizeMode = AutoSizeMode.GrowOnly,
                         BackColor = schedule.Color,
-                        Location = new Point(detailed.Margin.Left + (int)(schedule.GetStartRatio(date) * width), i * 35)
+                        Location = new Point(detailed.Margin.Left + (int)(schedule.GetStartRatio(date) * width), (i + f) * 35)
                     };
 
 
@@ -159,7 +223,8 @@ namespace HomeWork
                         Font = new Font(fontFamily, 6, FontStyle.Regular),
                         Text = schedule.Subject,
                         ForeColor = schedule.GetTextColor(),
-                        AutoSize = true
+                        AutoSize = true,
+                        Dock = DockStyle.Fill,
                     });
                     container.Controls.Add(new Label()
                     {
@@ -182,14 +247,16 @@ namespace HomeWork
                         container.Controls.Add(new Label()
                         {
                             Font = new Font(fontFamily, 7f, FontStyle.Regular),
-                            Text = "提出物 x" + schedule.Detail.Length,
+                            Text = "提出物 x" + schedule.Detail.Count,
                             ForeColor = schedule.GetTextColor(),
                             AutoEllipsis = true,
-                            AutoSize = true
+                            AutoSize = true,
+                            Dock = DockStyle.None,
                         });
 
                     }
                     container.Click += (sender, e) => AddTab(schedule);
+
                     detailed.Controls.Add(container);
                 }
             }
@@ -199,20 +266,21 @@ namespace HomeWork
         {
             TableContentsPanel tableLayoutPanel = new() { Location = new(0, 30), AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly };
             TabPage tabPage = new() { Text = schedule.Title, AutoScroll = true };
-            tab.TabPages.Insert(0, tabPage);
-            tab.SelectedTab = tabPage;
+            tabs.TabPages.Insert(0, tabPage);
+            tabs.SelectedTab = tabPage;
             tabPage.HorizontalScroll.Enabled = false;
-            Button button = new() { Text = "close", AutoSize = true };
-            button.Click += (sender, e) => { tabPage.Dispose(); tab.TabPages.Remove(tabPage); };
+            Button button = new() { Text = "閉じる", AutoSize = true };
+            button.Click += (sender, e) => { tabPage.Dispose(); tabs.TabPages.Remove(tabPage); };
 
             tabPage.Controls.Add(button);
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.3f));
-            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f-24));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f - 25));
             tabPage.Controls.Add(tableLayoutPanel);
+            tableLayoutPanel.AddTextRow("タイトル", schedule.Title);
             switch (schedule.Type)
             {
                 case "homework":
-                    tableLayoutPanel.AddTextRow("タイトル", schedule.Title);
+
                     tableLayoutPanel.AddTextRow("配布日", schedule.Start.ToString("f"));
                     tableLayoutPanel.AddTextRow("提出日", schedule.End.ToString("f"));
                     if (schedule.Description != null) tableLayoutPanel.AddTextRow("メモ", schedule.Description);
@@ -223,32 +291,60 @@ namespace HomeWork
                     FlowLayoutPanel accordion = new()
                     {
                         FlowDirection = FlowDirection.TopDown,
-                        BackColor = Color.Tan,
                         Width = tableLayoutPanel.ContWidth,
                         AutoSize = true,
                         AutoSizeMode = AutoSizeMode.GrowOnly,
                         WrapContents = false
                     };
                     tableLayoutPanel.AddCustomRow("提出物", accordion);
-                    foreach(Submission submission in schedule.Detail)
+                    foreach (Submission submission in schedule.Detail)
                     {
-
-                        TitledPanel submissionView = new(new TableContentsPanel())
+                        TableContentsPanel table = new() { AutoSize = true };
+                        accordion.Controls.Add(new TitledPanel(table)
                         {
                             Text = submission.Name,
-                            Margin =  new(0),
-                            MinimumSize = new(tableLayoutPanel.ContWidth,25),
+                            Margin = new(0),
+                            MinimumSize = new(tableLayoutPanel.ContWidth, 25),
                             AutoSizeMode = AutoSizeMode.GrowOnly,
-                            AutoSize = true
-                            
-                        };
-                        accordion.Controls.Add(submissionView);
-                        submissionView.AutoSize = true;
+                            AutoSize = true,
+                        });
+                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.32f));
+                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.68f));
+
+                        table.AddTextRow("タイトル", submission.Name);
+                        if (submission.Description != null) table.AddTextRow("説明", submission.Description);
+                        switch (submission.Category)
+                        {
+                            case "regular":
+                                Note? note = schedules.LoadRegular(submission.Id);
+                                if (note == null)
+                                {
+                                    table.AddTextRow("提出物", $"[{submission.Id}が見つかりませんでした。\nこのIDのノートが存在するか確認してください。]");
+                                }
+                                else
+                                {
+                                    table.AddLinkRow("提出物", note.Name ?? "[提出物を読み込めませんでした]", (sender, e) => { Debug.WriteLine("クリックされました"); });
+                                }
+                                FlowLayoutPanel pages = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true };
+                                pages.Controls.AddRange(submission.PageLabel());
+
+                                table.AddCustomRow("ページ", pages);
+                                break;
+                            case "irregular":
+                                break;
+                            case "fix":
+                                break;
+                            default:
+                                break;
+                        }
+                        table.AddTextRow("丸付け", submission.Circling ? "あり" : "なし");
+                        table.AddTextRow("公開レベル", submission.ShareLevel.Name);
                     }
                     break;
                 default:
                     break;
             }
+            tableLayoutPanel.AddTextRow("提供:", $"{schedule.Provided:G}頃\nby{schedule.Provider ?? "自分"}");
 
         }
         private void NextMonth_Click(object sender, EventArgs e)
@@ -282,5 +378,181 @@ namespace HomeWork
             }
         }
 
+        private void AddScheduleButton_Click(object sender, EventArgs e)
+        {
+
+            FlowLayoutPanel parent = new() { FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new(0), AutoScroll = true };
+            TableContentsPanel tableLayoutPanel = new() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly };
+            TabPage tabPage = new() { Text = "新しい予定" };
+            tabPage.Controls.Add(parent);
+            tabs.TabPages.Insert(0, tabPage);
+            parent.Size = tabPage.Size;
+            tabs.SelectedTab = tabPage;
+            Button button = new() { Text = "閉じる", AutoSize = true };
+            parent.HorizontalScroll.Enabled = false;
+            parent.HorizontalScroll.Visible = false;
+            button.Click += (sender, e) => { tabPage.Dispose(); tabs.TabPages.Remove(tabPage); };
+            Schedule submission = new();
+            parent.Controls.Add(button);
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.4f));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.6f - 27));
+            parent.Controls.Add(tableLayoutPanel);
+            {
+                ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+                box.Items.AddRange(ScheduleType.Levels);
+                box.SelectedValueChanged += (sender, e) => submission.ScheduleType = ((ScheduleType?)box.SelectedItem) ?? ScheduleType.Levels[0];
+                box.SelectedIndex = addSchedule.SelectedIndex;
+                tableLayoutPanel.AddCustomRow("種類", box, true);
+            }
+
+            tableLayoutPanel.AddTextInput("タイトル", "新しい予定");
+            tableLayoutPanel.AddTextInput("説明", field: true);
+            ComboBox subjBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+            subjBox.Items.AddRange(schedules.Subjects);
+            subjBox.SelectedValueChanged += (sender, e) => submission.Subject = (((Subject?)subjBox.SelectedItem) ?? new Subject() { Name = "未指定", Id = "unknown" }).Id;
+            subjBox.SelectedIndex = 0;
+            tableLayoutPanel.AddCustomRow("教科", subjBox, true);
+
+
+            {
+                DateTimePicker dateTime = new()
+                {
+                    Format = DateTimePickerFormat.Custom,
+                    CustomFormat = "yyyy/MM/dd HH:mm:ss",
+                    Width = tableLayoutPanel.ContWidth - 20,
+                    Value = detailDate ?? DateTime.Now
+                };
+
+                FlowLayoutPanel panel = new() { AutoSize = true };
+                panel.Controls.Add(dateTime);
+                CheckBox box1 = new() { Text = "終日" };
+                box1.CheckedChanged += (sender, e) => dateTime.Format = box1.Checked ? DateTimePickerFormat.Short : DateTimePickerFormat.Custom;
+                panel.Controls.Add(box1);
+                tableLayoutPanel.AddCustomRow("開始時刻", panel, true);
+            }
+            {
+                DateTimePicker dateTime = new()
+                {
+                    Format = DateTimePickerFormat.Custom,
+                    CustomFormat = "yyyy/MM/dd HH:mm:ss",
+                    Width = tableLayoutPanel.ContWidth - 20,
+                    Value = detailDate ?? DateTime.Now
+                };
+
+                FlowLayoutPanel panel = new() { AutoSize = true };
+                panel.Controls.Add(dateTime);
+                CheckBox box1 = new() { Text = "終日" };
+                box1.CheckedChanged += (sender, e) => dateTime.Format = box1.Checked ? DateTimePickerFormat.Short : DateTimePickerFormat.Custom;
+                panel.Controls.Add(box1);
+                tableLayoutPanel.AddCustomRow("終了時刻", panel, true);
+            }
+            FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
+            parent.Controls.Add(flowLayoutPanel);
+            AddSubmission(subjBox,flowLayoutPanel, tabPage.Width, submission);
+
+        }
+        private void AddSubmission(ComboBox subjBox,FlowLayoutPanel panel, int width, Schedule schedule)
+        {
+            Submission submission = new();
+            TableContentsPanel tableLayoutPanel = new() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly, Margin = new(0) };
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.4f));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.6f - 35));
+            TitledPanel titledPanel = new(tableLayoutPanel)
+            {
+                AutoSizeMode = AutoSizeMode.GrowOnly,
+                AutoSize = true,
+                MinimumSize = new(width - 35, 25),
+                MaximumSize = new(width - 35, 0),
+                Text = "提出物",
+            };
+            panel.Controls.Add(titledPanel);
+            tableLayoutPanel.AddTextInput("タイトル", "提出物", eventHandler: new((sender, e) => submission.Name = ((TextBox?)sender)?.Text ?? "提出物"));
+            FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true };
+            ComboBox box = new();
+            box.Items.AddRange(SubmissionType.Levels);
+            box.SelectedValueChanged += (sender, e) => submission.Category = ((SubmissionType?)box.SelectedItem)?.Id;
+            flowLayoutPanel.Controls.Add(box);
+            CheckBox checkBox = new()
+            {
+                Text = "丸付け",
+                Checked = true
+            };
+            checkBox.CheckedChanged += (sender, e) => submission.Circling = checkBox.Checked;
+            
+            flowLayoutPanel.Controls.Add(checkBox);
+            tableLayoutPanel.AddCustomRow("種別", flowLayoutPanel, fit: true);
+            EventHandler handler = AddRegular(schedule, tableLayoutPanel);
+            subjBox.SelectedValueChanged += handler;
+        }
+
+        private EventHandler AddRegular(Schedule schedule, Submission submission, TableContentsPanel tableLayoutPanel)
+        {
+            var startPage = new TrackBar() { Width = tableLayoutPanel.ContWidth };
+            var endPage = new TrackBar() { Width = tableLayoutPanel.ContWidth };
+            ComboBox submiBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+            submiBox.Items.AddRange(schedules.SearchRegular(schedule.Subject));
+            submiBox.SelectedValueChanged += (sender, e) =>
+            {
+                Note? note = (Note?)submiBox.SelectedItem;
+                startPage.Maximum = (((Note?)submiBox.SelectedItem)?.Pages) ?? 100;
+                endPage.Maximum = (((Note?)submiBox.SelectedItem)?.Pages) ?? 100;
+            };
+
+            submiBox.SelectedIndex = 0;
+            startPage.ValueChanged += (sender, e) => { if (startPage.Value > endPage.Value) endPage.Value = startPage.Value; toolTip.SetToolTip(startPage, startPage.Value.ToString()); };
+            endPage.ValueChanged += (sender, e) => { if (startPage.Value > endPage.Value) startPage.Value = endPage.Value; toolTip.SetToolTip(endPage, endPage.Value.ToString()); };
+            toolTip.SetToolTip(startPage, startPage.Value.ToString());
+            toolTip.SetToolTip(endPage, endPage.Value.ToString());
+            tableLayoutPanel.AddCustomRow("提出物", submiBox, fit: true);
+            EventHandler hander = new((sender, e) =>
+            {
+                submiBox.Items.Clear();
+                submiBox.Items.AddRange(schedules.SearchRegular(schedule.Subject));
+                submiBox.SelectedIndex = 0;
+            });
+            {
+                var flow = new FlowLayoutPanel() { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true };
+                tableLayoutPanel.AddCustomRow("ページ", flow, fit: true);
+                flow.Controls.Add(startPage);
+                flow.Controls.Add(endPage);
+                Button addButton = new() { Text = "追加する", AutoSize = true };
+                Button remButton = new() { Text = "削除する", AutoSize = true };
+                flow.Controls.Add(addButton);
+                flow.Controls.Add(remButton);
+                ListBox list = new() { Width = tableLayoutPanel.ContWidth - 10 };
+                addButton.Click += (sender, e) =>
+                {
+                    for (int v = startPage.Value; v < endPage.Value + 1; v++)
+                    {
+                        if (!list.Items.Contains(v))
+                        {
+                            list.Items.Add(v);
+                        }
+                    }
+                    List<int> ints = list.Items.Cast<int>().ToList();
+                    ints.Sort();
+                    submission.Pages = Submission.ListToText(ints);
+                    flow.Controls.Add(list);
+                };
+                remButton.Click += (sender, e) =>
+                {
+                    for (int v = startPage.Value; v < endPage.Value + 1; v++)
+                    {
+                        if (list.Items.Contains(v))
+                        {
+                            list.Items.Remove(v);
+                        }
+                    }
+                    List<int> ints = list.Items.Cast<int>().ToList();
+                    ints.Sort();
+                    submission.Pages = Submission.ListToText(ints);
+                    flow.Controls.Add(list);
+                };
+                
+            }
+
+            return hander;
+        }
     }
+
 }

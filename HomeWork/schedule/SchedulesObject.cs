@@ -1,23 +1,25 @@
 ﻿using Newtonsoft.Json;
-using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json.Serialization;
+using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
+
 
 namespace HomeWork.schedule
 {
-    internal class Schedules
+    internal class SchedulesObject
     {
-        public Subject[] subjects { get; set; } = [];
-        public Note[] regulars { get; set; } = [];
-        public Schedule[] schedules { get; set; } = [];
-        public static Schedules? LoadJson(string filepath)
+        public Subject[] Subjects { get; set; } = [];
+        public Note[] Regulars { get; set; } = [];
+        public Schedule[] Schedules { get; set; } = [];
+        public static SchedulesObject? LoadJson(string filepath)
         {
-            return JsonConvert.DeserializeObject<Schedules>(File.ReadAllText(filepath));
+            return JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
         }
         public Subject? LoadSubject(string id)
         {
-            foreach (Subject subject in subjects)
+            foreach (Subject subject in Subjects)
             {
                 if (subject.Id == id) { return subject; }
             }
@@ -25,18 +27,27 @@ namespace HomeWork.schedule
         }
         public Note? LoadRegular(string id)
         {
-            foreach (Note note in regulars)
+            foreach (Note note in Regulars)
             {
                 if (note.Id == id) { return note; }
             }
             return null;
         }
+        public Note[] SearchRegular(string subject)
+        {
+            List<Note> notes = [];
+            foreach (Note note in Regulars)
+            {
+                if (note.Subject == subject) { notes.Add(note); }
+            }
+            return [.. notes];
+        }
         public List<int>[] GetSchedules(DateTime dateStart, DateTime dateFinish)
         {
             var result = new List<int>[(int)dateFinish.Subtract(dateStart).TotalDays];
-            for (int i1 = 0; i1 < schedules.Length; i1++)
+            for (int i1 = 0; i1 < Schedules.Length; i1++)
             {
-                var schedule = schedules[i1];
+                var schedule = Schedules[i1];
                 if (schedule.Start.CompareTo(dateFinish) <= 0 &&
                     schedule.End.CompareTo(dateStart) >= 0)
                 {
@@ -54,7 +65,7 @@ namespace HomeWork.schedule
             }
             for (int i = 0; i < result.Length; i++)
             {
-                if (result[i] != null) result[i] = [.. result[i].OrderBy(i => schedules[i].Start.Ticks)];
+                if (result[i] != null) result[i] = [.. result[i].OrderBy(i => Schedules[i].Start.Ticks)];
             }
 
             return result;
@@ -63,8 +74,12 @@ namespace HomeWork.schedule
 
     public class Subject
     {
-        public string? Id { get; set; }
+        public string Id { get; set; } = "unknown";
         public string Name { get; set; } = string.Empty;
+        public override string ToString()
+        {
+            return Name;
+        }
     }
     public class Note
     {
@@ -73,19 +88,33 @@ namespace HomeWork.schedule
         public string? Subject { get; set; }
         public int Pages { get; set; }
         public string? Alias { get; set; }
+        public override string? ToString()
+        {
+            return Name;
+        }
+        public string? Type { get {  return Id?.Split('.')[1]; } }
     }
     public class Schedule
     {
         public int Id { get; set; }
         public string Title { get; set; } = "";
         public string Type { get; set; } = string.Empty;
+        [JsonIgnore]
+        public ScheduleType ScheduleType
+        {
+            get => ScheduleType.GetLevel(Type);
+            set => Type = value.Id;
+        }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public string? Description { get; set; }
+        public DateTime Provided {  get; set; }
+        public string? Provider {  get; set; }
         public string Subject { get; set; } = string.Empty;
         public Color Color { get; set; }
         public Color GetTextColor() => GetContrastColor(Color);
-        public Submission[] Detail { get; set; } = [];
+        public List<Submission> Detail { get; set; } = [];
+
 
         public static Color GetContrastColor(Color originalColor)
         {
@@ -114,26 +143,56 @@ namespace HomeWork.schedule
         public string Name { get; set; } = "提出物？";
         public string? Description { get; set; }
         public string? Category {  get; set; }
-        public string? Id { get; set; }
-        private string[]? Pages {  get; set; }
-        public readonly List<int> PageList = [];
-        public Submission()
+        public string Id { get; set; } = string.Empty;
+        public string[]? Pages { get; set; }
+
+
+        public string? Share { get; set; }
+
+        public bool Circling { get; set; } = false;
+
+        public Label[] PageLabel()
         {
-            if (Pages != null)
+            if (Pages == null)
             {
-                foreach (string page in Pages)
+                return [];
+            }
+            else
+            {
+                return Pages.Select(v => new Label() { Text = v.Replace('-','～'), AutoSize = true }).ToArray();
+            }
+        }
+        public static string[] ListToText(IReadOnlyList<int> numbers)
+        {
+            List<string> list = [];
+            for (int i = 0; i < numbers.Count; i++)
+            {
+                int start = numbers[i];
+                int end = start;
+
+                while (i + 1 < numbers.Count && numbers[i+1] == end + 1)
                 {
-                    if (page.Contains('-'))
-                    {
-                        string[] strings = page.Split('-');
-                        PageList.AddRange(Enumerable.Range(int.Parse(strings[0]), int.Parse(strings[1]) + 1));
-                    }
-                    else
-                    {
-                        PageList.Add(int.Parse(page));
-                    }
+                    end = numbers[i + 1];
+                    i++;
+                }
+
+                if (start != end)
+                {
+                    list.Add(start + "-" + end);
+                }
+                else
+                {
+                    list.Add(start.ToString());
                 }
             }
+
+            return list.ToArray();
+        }
+        [JsonIgnore]
+        public ShareLevel ShareLevel
+        {
+            get { return ShareLevel.GetLevel(Share); }
+            set { Share = value.Id; }
         }
     }
 }
