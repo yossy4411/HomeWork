@@ -55,6 +55,8 @@ namespace HomeWork
             feedbackMenu = new ToolStripMenuItem();
             sendFeedbackMenu = new ToolStripMenuItem();
             toolTip = new ToolTip(components);
+            imageList1 = new ImageList(components);
+            colorPicker = new ColorDialog();
             calendarHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nextMonth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)previousMonth).BeginInit();
@@ -277,6 +279,12 @@ namespace HomeWork
             sendFeedbackMenu.Size = new Size(229, 26);
             sendFeedbackMenu.Text = "フィードバックを送信する";
             // 
+            // imageList1
+            // 
+            imageList1.ColorDepth = ColorDepth.Depth32Bit;
+            imageList1.ImageSize = new Size(16, 16);
+            imageList1.TransparentColor = Color.Transparent;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -327,5 +335,7 @@ namespace HomeWork
         private ComboBox addSchedule;
         private Button addScheduleButton;
         private ToolTip toolTip;
+        private ImageList imageList1;
+        private ColorDialog colorPicker;
     }
 }

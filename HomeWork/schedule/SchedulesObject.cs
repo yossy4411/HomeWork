@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 
@@ -16,6 +17,11 @@ namespace HomeWork.schedule
         public static SchedulesObject? LoadJson(string filepath)
         {
             return JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
+        }
+        public string ToJson() => JsonConvert.SerializeObject(this);
+        public static void SaveJson(SchedulesObject json, string filepath)
+        {
+            File.WriteAllText(filepath, json.ToJson());
         }
         public Subject? LoadSubject(string id)
         {
@@ -100,6 +106,7 @@ namespace HomeWork.schedule
         public string Title { get; set; } = "";
         public string Type { get; set; } = string.Empty;
         [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public ScheduleType ScheduleType
         {
             get => ScheduleType.GetLevel(Type);
@@ -111,6 +118,7 @@ namespace HomeWork.schedule
         public DateTime Provided {  get; set; }
         public string? Provider {  get; set; }
         public string Subject { get; set; } = string.Empty;
+        [System.Text.Json.Serialization.JsonConverter(typeof(SubmissionParser.ColorConverter))]
         public Color Color { get; set; }
         public Color GetTextColor() => GetContrastColor(Color);
         public List<Submission> Detail { get; set; } = [];
@@ -137,14 +145,30 @@ namespace HomeWork.schedule
         public bool IsStartOfDay() => End.Hour == 0 && End.Minute == 0 && End.Second == 0;
         public bool IsStart(DateTime date) => Start.Date == date.Date;
         public bool IsFinish(DateTime date) => End.Date == date.Date;
+        private static readonly JsonSerializerOptions options = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+        public string ToJson()
+        {
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+        }
+        internal static string? CheckCorrect(Schedule schedule)
+        {
+            Debug.WriteLine(schedule.ToJson());
+            if (schedule.Start.CompareTo(schedule.End) > 0) return "予定の開始時刻は終了時刻より前でないといけません";
+            return null;
+        }
     }
     public class Submission
     {
-        public string Name { get; set; } = "提出物？";
+        public string Name { get; set; } = "提出物";
         public string? Description { get; set; }
         public string? Category {  get; set; }
         public string Id { get; set; } = string.Empty;
-        public string[]? Pages { get; set; }
+        public List<string>? Pages { get; set; }
 
 
         public string? Share { get; set; }
@@ -162,9 +186,9 @@ namespace HomeWork.schedule
                 return Pages.Select(v => new Label() { Text = v.Replace('-','～'), AutoSize = true }).ToArray();
             }
         }
-        public static string[] ListToText(IReadOnlyList<int> numbers)
+        public static void ListToText(List<string> origin, IReadOnlyList<int> numbers)
         {
-            List<string> list = [];
+            origin.Clear();
             for (int i = 0; i < numbers.Count; i++)
             {
                 int start = numbers[i];
@@ -178,17 +202,16 @@ namespace HomeWork.schedule
 
                 if (start != end)
                 {
-                    list.Add(start + "-" + end);
+                    origin.Add(start + "-" + end);
                 }
                 else
                 {
-                    list.Add(start.ToString());
+                    origin.Add(start.ToString());
                 }
             }
-
-            return list.ToArray();
         }
         [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public ShareLevel ShareLevel
         {
             get { return ShareLevel.GetLevel(Share); }
