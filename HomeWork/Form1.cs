@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms;
@@ -401,10 +402,11 @@ namespace HomeWork
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.6f - 27));
             parent.Controls.Add(tableLayoutPanel);
             {
-                ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList };
-                box.Items.AddRange(ScheduleType.Levels);
-                box.SelectedValueChanged += (sender, e) => schedule.ScheduleType = ((ScheduleType?)box.SelectedItem) ?? ScheduleType.Levels[0];
-                box.SelectedIndex = addSchedule.SelectedIndex;
+                ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, DisplayMember="Name", ValueMember="Id"};
+                box.Items.AddRange(ScdLevel.GetEnumValues<SchType>());
+                box.Format += (sender,e)=>Debug.WriteLine(e);
+                box.SelectedValueChanged += (sender, e) => schedule.ScheduleType = ((ScheduleLevel<SchType>?)box.SelectedItem)?.Id;
+                box.SelectedIndex = (int)SchType.ShortEvent;
                 tableLayoutPanel.AddCustomRow("種類", box, true);
             }
             schedule.Title = "新しい予定";
@@ -490,6 +492,16 @@ namespace HomeWork
             parent.Controls.Add(submitSchedule);
             parent.Controls.Add(errorlabel);
         }
+
+        private void Box_Format(object? sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem == null)
+                return;
+
+            if (e.ListItem is Enum @enum)
+            e.Value = ScdLevel.GetJapaneseString(@enum);
+        }
+
         private void AddSubmission(ComboBox subjBox,FlowLayoutPanel panel, int width, Schedule schedule)
         {
             Submission submission = new();

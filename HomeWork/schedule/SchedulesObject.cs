@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -107,10 +108,10 @@ namespace HomeWork.schedule
         public string Type { get; set; } = string.Empty;
         [JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public ScheduleType ScheduleType
+        public SchType? ScheduleType
         {
-            get => ScheduleType.GetLevel(Type);
-            set => Type = value.Id;
+            get => ScdLevel.GetValue<SchType>(Type);
+            set => Type = value.ToString()??string.Empty;
         }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
