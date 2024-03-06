@@ -182,10 +182,9 @@ namespace HomeWork
             float width = detailed.Width - 5;
             detailGroup.Text = $"{date:D}（{date:ddd}）の予定";
             foreach (Control control in detailed.Controls) { control.Dispose(); }
-            addSchedule.Items[0] = $"{date:d} に {ScheduleType.Levels[0]} を追加";
-            addSchedule.Items[1] = $"{date:d} に {ScheduleType.Levels[1]} を追加";
-            addSchedule.Items[2] = $"{date:d} に {ScheduleType.Levels[2]} を追加";
-
+            addSchedule.Items[0] = $"{date:d} に {ScdLevel.GetJapaneseString(SchType.Homework)} を追加";
+            addSchedule.Items[1] = $"{date:d} に {ScdLevel.GetJapaneseString(SchType.LongEvent)} を追加";
+            addSchedule.Items[2] = $"{date:d} に {ScdLevel.GetJapaneseString(SchType.ShortEvent)} を追加";
             detailed.Controls.Clear();
             var holiday = SearchEvent(holidays, date);
             int f = 0;
@@ -281,9 +280,9 @@ namespace HomeWork
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f - 25));
             tabPage.Controls.Add(tableLayoutPanel);
             tableLayoutPanel.AddTextRow("タイトル", schedule.Title);
-            switch (schedule.Type)
+            switch (schedule.ScheduleType)
             {
-                case "homework":
+                case SchType.Homework:
 
                     tableLayoutPanel.AddTextRow("配布日", schedule.Start.ToString("f"));
                     tableLayoutPanel.AddTextRow("提出日", schedule.End.ToString("f"));
@@ -342,7 +341,7 @@ namespace HomeWork
                                 break;
                         }
                         table.AddTextRow("丸付け", submission.Circling ? "あり" : "なし");
-                        table.AddTextRow("公開レベル", submission.ShareLevel.Name);
+                        table.AddTextRow("公開レベル", ScdLevel.GetJapaneseString(submission.ShareLevel));
                     }
                     break;
                 default:
@@ -402,11 +401,10 @@ namespace HomeWork
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.6f - 27));
             parent.Controls.Add(tableLayoutPanel);
             {
-                ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, DisplayMember="Name", ValueMember="Id"};
+                ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList };
                 box.Items.AddRange(ScdLevel.GetEnumValues<SchType>());
-                box.Format += (sender,e)=>Debug.WriteLine(e);
-                box.SelectedValueChanged += (sender, e) => schedule.ScheduleType = ((ScheduleLevel<SchType>?)box.SelectedItem)?.Id;
-                box.SelectedIndex = (int)SchType.ShortEvent;
+                box.SelectedValueChanged += (sender, e) => schedule.ScheduleType = ((ScheduleLevel<SchType>?)box.SelectedItem)?.Value;
+                box.SelectedIndex = addSchedule.SelectedIndex;
                 tableLayoutPanel.AddCustomRow("種類", box, true);
             }
             schedule.Title = "新しい予定";
@@ -531,7 +529,7 @@ namespace HomeWork
             tableLayoutPanel.AddTextInput("タイトル", "提出物", eventHandler: new((sender, e) => submission.Name = ((TextBox?)sender)?.Text ?? "提出物"));
             FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true };
             ComboBox box = new();
-            box.Items.AddRange(SubmissionType.Levels);
+            box.Items.AddRange(ScdLevel.GetEnumValues<MyEnum>());
             box.SelectedIndex = 0;
             flowLayoutPanel.Controls.Add(box);
             CheckBox checkBox = new()
@@ -547,21 +545,21 @@ namespace HomeWork
             subjBox.SelectedValueChanged += handler;
             box.SelectedValueChanged += (sender, e) =>
             {
-                SubmissionType? submType = (SubmissionType?)box.SelectedItem;
-                submission.Category = (submType)?.Id;
                 ResetTable(tableLayoutPanel, 3);
                 subjBox.SelectedIndexChanged -= handler;
-                if (submType == SubmissionType.Regular)
+                switch (submission.CategoryType = ((ScheduleLevel<MyEnum>?)box.SelectedItem)?.Value??MyEnum.Regular)
                 {
-                    handler = AddRegular(schedule, submission, tableLayoutPanel);
-                }
-                if (submType == SubmissionType.Irregular)
-                {
-                    handler = AddIrregular(submission, tableLayoutPanel);
-                }
-                if (submType == SubmissionType.Fix)
-                {
-                    handler = AddFix(schedule, submission, tableLayoutPanel);
+                    case MyEnum.Regular:
+                        handler = AddRegular(schedule, submission, tableLayoutPanel);
+                        break;
+
+                    case MyEnum.Irregular:
+                        handler = AddIrregular(submission, tableLayoutPanel);
+                        break;
+
+                    case MyEnum.Fix:
+                        handler = AddFix(schedule, submission, tableLayoutPanel);
+                        break;
                 }
                 subjBox.SelectedIndexChanged += handler;
             };

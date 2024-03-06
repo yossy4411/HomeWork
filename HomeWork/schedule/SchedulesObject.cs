@@ -170,8 +170,13 @@ namespace HomeWork.schedule
         public string? Category {  get; set; }
         public string Id { get; set; } = string.Empty;
         public List<string>? Pages { get; set; }
-
-
+        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        public MyEnum CategoryType
+        {
+            get { return ScdLevel.GetValue<MyEnum>(Category); }
+            set { Category = value.ToString(); }
+        }
         public string? Share { get; set; }
 
         public bool Circling { get; set; } = false;
@@ -213,10 +218,10 @@ namespace HomeWork.schedule
         }
         [JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public ShareLevel ShareLevel
+        public Share ShareLevel
         {
-            get { return ShareLevel.GetLevel(Share); }
-            set { Share = value.Id; }
+            get { return ScdLevel.GetValue<Share>(Share); }
+            set { Share = value.ToString(); }
         }
     }
 }
