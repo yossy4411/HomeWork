@@ -1,10 +1,8 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json;
+using SeIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 
 
@@ -14,7 +12,8 @@ namespace HomeWork.schedule
     {
         public Subject[] Subjects { get; set; } = [];
         public Note[] Regulars { get; set; } = [];
-        public Schedule[] Schedules { get; set; } = [];
+        public List<Schedule> Schedules { get; set; } = [];
+        public Properties Properties { get; set; } = new Properties();
         public static SchedulesObject? LoadJson(string filepath)
         {
             return JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
@@ -52,7 +51,7 @@ namespace HomeWork.schedule
         public List<int>[] GetSchedules(DateTime dateStart, DateTime dateFinish)
         {
             var result = new List<int>[(int)dateFinish.Subtract(dateStart).TotalDays];
-            for (int i1 = 0; i1 < Schedules.Length; i1++)
+            for (int i1 = 0; i1 < Schedules.Count; i1++)
             {
                 var schedule = Schedules[i1];
                 if (schedule.Start.CompareTo(dateFinish) <= 0 &&
@@ -107,7 +106,7 @@ namespace HomeWork.schedule
         public string Title { get; set; } = "";
         public string Type { get; set; } = string.Empty;
         [JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
+        [SeIgnore]
         public SchType? ScheduleType
         {
             get => ScdLevel.GetValue<SchType>(Type);
@@ -125,21 +124,13 @@ namespace HomeWork.schedule
         public List<Submission> Detail { get; set; } = [];
 
 
-        public static Color GetContrastColor(Color originalColor)
+        static Color GetContrastColor(Color backgroundColor)
         {
-            double originalContrast = CalculateContrast(originalColor, Color.Black);
-            double invertedContrast = CalculateContrast(originalColor, Color.White);
+            // 色の輝度を計算 (RGB to YIQ)
+            double brightness = (0.299 * backgroundColor.R + 0.587 * backgroundColor.G + 0.114 * backgroundColor.B) / 255;
 
-            return originalContrast > invertedContrast ? Color.Black : Color.White;
-        }
-
-        private static double CalculateContrast(Color color1, Color color2)
-        {
-            double luminance1 = (0.299 * color1.R + 0.587 * color1.G + 0.114 * color1.B) / 255.0;
-            double luminance2 = (0.299 * color2.R + 0.587 * color2.G + 0.114 * color2.B) / 255.0;
-
-            // 相対輝度の計算
-            return (Math.Max(luminance1, luminance2) + 0.05) / (Math.Min(luminance1, luminance2) + 0.05);
+            // コントラスト比に基づいて白または黒を選択
+            return brightness > 0.5 ? Color.Black : Color.White;
         }
         public float GetStartRatio(DateTime date) => date.Day == Start.Day ? (Start.Hour + Start.Minute / 60f) / 24f : 0;
         public float GetFinishRatio(DateTime date) => date.Day == End.Day && !IsStartOfDay() ? (End.Hour + End.Minute / 60f) / 24f : 1;
@@ -158,10 +149,41 @@ namespace HomeWork.schedule
         }
         internal static string? CheckCorrect(Schedule schedule)
         {
-            Debug.WriteLine(schedule.ToJson());
             if (schedule.Start.CompareTo(schedule.End) > 0) return "予定の開始時刻は終了時刻より前でないといけません";
+            for (int i = 0; i < schedule.Detail.Count; i++)
+            {
+                if (schedule.Detail[i].CategoryType == MyEnum.Regular) {
+                    var pages = schedule.Detail[i].Pages;
+                    if (pages == null) return $"ページが指定されていない箇所（提出物#{i}）があります。";
+                    else if (pages.Count == 0) return $"提出物#{i}でページが含まれていないことは好ましくありません";
+                }
+            }
             return null;
         }
+        /// <summary>
+        /// Setup schedule for publishing.
+        /// </summary>
+        /// <param name="schedule">Value to setup</param>
+        internal static void FingerPrint(Schedule schedule, Authorizer auth) {
+            schedule.Provided = DateTime.Now;
+            schedule.Provider = auth.UserID;
+        }
+    }
+    public class Properties
+    {
+        public int Int { get; set; }
+    }
+    public class Authorizer
+    {
+        public static Authorizer Create(Properties properties)
+        {
+            return new();
+        }
+        public static Authorizer Create()
+        {
+            return new();
+        }
+        public string? UserID;
     }
     public class Submission
     {
@@ -217,7 +239,7 @@ namespace HomeWork.schedule
             }
         }
         [JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
+        [SeIgnore]
         public Share ShareLevel
         {
             get { return ScdLevel.GetValue<Share>(Share); }

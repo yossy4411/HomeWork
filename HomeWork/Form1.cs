@@ -14,7 +14,7 @@ namespace HomeWork
 {
     public partial class Form1 : Form
     {
-        private readonly SchedulesObject schedules = ResetF();
+        private readonly SchedulesObject schedules;
         private readonly FontFamily fontFamily = FontFamily.GenericSansSerif;
         private readonly IList<Event> holidays;
         private float scroll = 0;
@@ -22,6 +22,7 @@ namespace HomeWork
         private DateTime monthDate;
         private List<int>[]? displayingSchedules;
         private DateTime? detailDate = null;
+        private readonly Authorizer authorizer;
 
         public Form1()
         {
@@ -37,6 +38,9 @@ namespace HomeWork
             Font = t.Item1;
             fontFamily = t.Item2;
             menuStrip1.Font = Font;
+            var t2 = ResetF();
+            schedules = t2.Item1;
+            authorizer = t2.Item2;
         }
 
 
@@ -53,11 +57,11 @@ namespace HomeWork
                 return (new Font(fontFamily, size), fontFamily);
             }
         }
-        private static SchedulesObject ResetF()
+        private static (SchedulesObject, Authorizer) ResetF()
         {
             string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             SchedulesObject? schedules = SchedulesObject.LoadJson(Path.Combine(home, "HWCalendar", "schedules.json"));
-            return schedules ?? new SchedulesObject();
+            return schedules != null ?(schedules, Authorizer.Create(schedules.Properties)) : (new SchedulesObject(), Authorizer.Create());
         }
         private static Event? SearchEvent(IList<Event> events, DateTime date)
         {
@@ -481,6 +485,8 @@ namespace HomeWork
                 {
                     tabPage.Dispose();
                     tabs.TabPages.Remove(tabPage);
+                    schedules.Schedules.Add(schedule);
+                    Schedule.FingerPrint(schedule, authorizer);
                 }
                 else
                 {
@@ -489,15 +495,6 @@ namespace HomeWork
             };
             parent.Controls.Add(submitSchedule);
             parent.Controls.Add(errorlabel);
-        }
-
-        private void Box_Format(object? sender, ListControlConvertEventArgs e)
-        {
-            if (e.ListItem == null)
-                return;
-
-            if (e.ListItem is Enum @enum)
-            e.Value = ScdLevel.GetJapaneseString(@enum);
         }
 
         private void AddSubmission(ComboBox subjBox,FlowLayoutPanel panel, int width, Schedule schedule)
@@ -586,6 +583,7 @@ namespace HomeWork
 
         private EventHandler AddRegular(Schedule schedule, Submission submission, TableContentsPanel tableLayoutPanel)
         {
+            submission.Description = null;
             var startPage = new TrackBar() { Width = tableLayoutPanel.ContWidth };
             var endPage = new TrackBar() { Width = tableLayoutPanel.ContWidth };
             ComboBox submiBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -656,11 +654,13 @@ namespace HomeWork
         }
         private static EventHandler? AddIrregular(Submission submission, TableContentsPanel tableLayoutPanel)
         {
+            submission.Pages = null;
             tableLayoutPanel.AddTextInput("説明", text: "プリント", field: true, eventHandler: (sender,e)=> submission.Description = ((TextBox?)sender)?.Text);
             return null;
         }
         private EventHandler AddFix(Schedule schedule, Submission submission, TableContentsPanel tableLayoutPanel)
         {
+            submission.Description = null;
             ListView list = new()
             {
                 View = View.Details,
