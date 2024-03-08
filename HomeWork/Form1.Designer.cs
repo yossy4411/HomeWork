@@ -190,7 +190,7 @@ namespace HomeWork
             addScheduleButton.TabIndex = 7;
             addScheduleButton.Text = "追加する";
             addScheduleButton.UseVisualStyleBackColor = true;
-            addScheduleButton.Click += AddScheduleButton_Click;
+            addScheduleButton.Click += AddSchedule;
             // 
             // addSchedule
             // 

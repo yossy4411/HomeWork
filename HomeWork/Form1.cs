@@ -186,9 +186,9 @@ namespace HomeWork
             float width = detailed.Width - 5;
             detailGroup.Text = $"{date:D}（{date:ddd}）の予定";
             foreach (Control control in detailed.Controls) { control.Dispose(); }
-            addSchedule.Items[0] = $"{date:d} に {ScdLevel.GetJapaneseString(SchType.Homework)} を追加";
-            addSchedule.Items[1] = $"{date:d} に {ScdLevel.GetJapaneseString(SchType.LongEvent)} を追加";
-            addSchedule.Items[2] = $"{date:d} に {ScdLevel.GetJapaneseString(SchType.ShortEvent)} を追加";
+            addSchedule.Items[0] = $"{date:d} に {ScdLevel.GetJapaneseString(ScheduleType.Homework)} を追加";
+            addSchedule.Items[1] = $"{date:d} に {ScdLevel.GetJapaneseString(ScheduleType.LongEvent)} を追加";
+            addSchedule.Items[2] = $"{date:d} に {ScdLevel.GetJapaneseString(ScheduleType.ShortEvent)} を追加";
             detailed.Controls.Clear();
             var holiday = SearchEvent(holidays, date);
             int f = 0;
@@ -286,7 +286,7 @@ namespace HomeWork
             tableLayoutPanel.AddTextRow("タイトル", schedule.Title);
             switch (schedule.ScheduleType)
             {
-                case SchType.Homework:
+                case ScheduleType.Homework:
 
                     tableLayoutPanel.AddTextRow("配布日", schedule.Start.ToString("f"));
                     tableLayoutPanel.AddTextRow("提出日", schedule.End.ToString("f"));
@@ -315,14 +315,14 @@ namespace HomeWork
                             AutoSizeMode = AutoSizeMode.GrowOnly,
                             AutoSize = true,
                         });
-                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.32f));
-                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.68f));
+                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.3f));
+                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.6f));
 
                         table.AddTextRow("タイトル", submission.Name);
                         if (submission.Description != null) table.AddTextRow("説明", submission.Description);
-                        switch (submission.Category)
+                        switch (submission.CategoryType)
                         {
-                            case "regular":
+                            case SubmissionCategory.Regular:
                                 Note? note = schedules.LoadRegular(submission.Id);
                                 if (note == null)
                                 {
@@ -337,9 +337,9 @@ namespace HomeWork
 
                                 table.AddCustomRow("ページ", pages);
                                 break;
-                            case "irregular":
+                            case SubmissionCategory.Irregular:
                                 break;
-                            case "fix":
+                            case SubmissionCategory.Fix:
                                 break;
                             default:
                                 break;
@@ -385,7 +385,7 @@ namespace HomeWork
             }
         }
 
-        private void AddScheduleButton_Click(object sender, EventArgs e)
+        private void AddSchedule(object sender, EventArgs e)
         {
 
             FlowLayoutPanel parent = new() { FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new(0), AutoScroll = true };
@@ -401,13 +401,13 @@ namespace HomeWork
             button.Click += (sender, e) => { tabPage.Dispose(); tabs.TabPages.Remove(tabPage); };
             Schedule schedule = new();
             parent.Controls.Add(button);
-            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.4f));
-            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.6f - 27));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.3f));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, tabPage.Width * 0.7f - 27));
             parent.Controls.Add(tableLayoutPanel);
             {
                 ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList };
-                box.Items.AddRange(ScdLevel.GetEnumValues<SchType>());
-                box.SelectedValueChanged += (sender, e) => schedule.ScheduleType = ((ScheduleLevel<SchType>?)box.SelectedItem)?.Value;
+                box.Items.AddRange(ScdLevel.GetEnumValues<ScheduleType>());
+                box.SelectedValueChanged += (sender, e) => schedule.ScheduleType = (ScheduleLevel<ScheduleType>?)box.SelectedItem;
                 box.SelectedIndex = addSchedule.SelectedIndex;
                 tableLayoutPanel.AddCustomRow("種類", box, true);
             }
@@ -487,6 +487,7 @@ namespace HomeWork
                     tabs.TabPages.Remove(tabPage);
                     schedules.Schedules.Add(schedule);
                     Schedule.FingerPrint(schedule, authorizer);
+                    schedules.Save();
                 }
                 else
                 {
@@ -502,8 +503,8 @@ namespace HomeWork
             Submission submission = new();
             schedule.Detail.Add(submission);
             TableContentsPanel tableLayoutPanel = new() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly, Margin = new(0) };
-            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.4f));
-            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.6f - 35));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.3f));
+            tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.7f - 35));
             TitledPanel titledPanel = new(tableLayoutPanel)
             {
                 AutoSizeMode = AutoSizeMode.GrowOnly,
@@ -521,12 +522,16 @@ namespace HomeWork
                 schedule.Detail.Remove(submission);
                 GC.Collect();
             };
-
             tableLayoutPanel.AddCustomRow("この提出物を", remthis, fit:true);
+            ComboBox share = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+            share.Items.AddRange(ScdLevel.GetEnumValues<ShareLevel>());
+            share.SelectedValueChanged += (sender, e) => Debug.WriteLine(submission.ShareLevel = (ScheduleLevel<ShareLevel>?)share.SelectedItem);
+            share.SelectedIndex = 0;
+            tableLayoutPanel.AddCustomRow("公開", share, fit:true);
             tableLayoutPanel.AddTextInput("タイトル", "提出物", eventHandler: new((sender, e) => submission.Name = ((TextBox?)sender)?.Text ?? "提出物"));
-            FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true };
-            ComboBox box = new();
-            box.Items.AddRange(ScdLevel.GetEnumValues<MyEnum>());
+            FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true, Margin = new(0) };
+            ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = tableLayoutPanel.ContWidth-5 };
+            box.Items.AddRange(ScdLevel.GetEnumValues<SubmissionCategory>());
             box.SelectedIndex = 0;
             flowLayoutPanel.Controls.Add(box);
             CheckBox checkBox = new()
@@ -538,23 +543,24 @@ namespace HomeWork
             
             flowLayoutPanel.Controls.Add(checkBox);
             tableLayoutPanel.AddCustomRow("種別", flowLayoutPanel, fit: true);
-            EventHandler? handler = AddRegular(schedule,submission, tableLayoutPanel);
+            submission.CategoryType = SubmissionCategory.Regular;
+            EventHandler ? handler = AddRegular(schedule,submission, tableLayoutPanel);
             subjBox.SelectedValueChanged += handler;
             box.SelectedValueChanged += (sender, e) =>
             {
-                ResetTable(tableLayoutPanel, 3);
+                ResetTable(tableLayoutPanel, 4);
                 subjBox.SelectedIndexChanged -= handler;
-                switch (submission.CategoryType = ((ScheduleLevel<MyEnum>?)box.SelectedItem)?.Value??MyEnum.Regular)
+                switch (submission.CategoryType = (ScheduleLevel<SubmissionCategory>?)box.SelectedItem)
                 {
-                    case MyEnum.Regular:
+                    case SubmissionCategory.Regular:
                         handler = AddRegular(schedule, submission, tableLayoutPanel);
                         break;
 
-                    case MyEnum.Irregular:
+                    case SubmissionCategory.Irregular:
                         handler = AddIrregular(submission, tableLayoutPanel);
                         break;
 
-                    case MyEnum.Fix:
+                    case SubmissionCategory.Fix:
                         handler = AddFix(schedule, submission, tableLayoutPanel);
                         break;
                 }
@@ -655,7 +661,8 @@ namespace HomeWork
         private static EventHandler? AddIrregular(Submission submission, TableContentsPanel tableLayoutPanel)
         {
             submission.Pages = null;
-            tableLayoutPanel.AddTextInput("説明", text: "プリント", field: true, eventHandler: (sender,e)=> submission.Description = ((TextBox?)sender)?.Text);
+            tableLayoutPanel.AddTextInput("説明", text: "プリント", field: true, eventHandler: (sender, e) => submission.Description = ((TextBox?)sender)?.Text);
+            submission.Description = "プリント";
             return null;
         }
         private EventHandler AddFix(Schedule schedule, Submission submission, TableContentsPanel tableLayoutPanel)

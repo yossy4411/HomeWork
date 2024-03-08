@@ -9,7 +9,7 @@ namespace HomeWork.schedule
     {
         public string Japanese { get; } = japaneseDay;
     }
-    public enum Share
+    public enum ShareLevel
     {
         [Display("なし")]
         None,
@@ -24,7 +24,7 @@ namespace HomeWork.schedule
         [Display("すべての友達")]
         AllFriend
     }
-    public enum SchType
+    public enum ScheduleType
     {
         [Display("宿題")]
         Homework,
@@ -33,7 +33,7 @@ namespace HomeWork.schedule
         [Display("イベント（１日間）")]
         ShortEvent
     }
-    public enum MyEnum
+    public enum SubmissionCategory
     {
         [Display("定期")]
         Regular,
@@ -49,6 +49,10 @@ namespace HomeWork.schedule
         public override string ToString()
         {
             return Name;
+        }
+        public static implicit operator T(ScheduleLevel<T>? value)
+        {
+            return value == null ? (T)Enum.ToObject(typeof(T), 0) : value.Value;
         }
     }
     public class ScdLevel()
@@ -79,9 +83,15 @@ namespace HomeWork.schedule
             try
             {
                 return (T)Enum.Parse(typeof(T), name);
-            }catch (Exception)
+            } catch (Exception)
             {
-                return GetEnumValues<T>()[0].Value;
+                try
+                {
+                    return (T)Enum.ToObject(typeof(T), 0);
+                } catch (Exception)
+                {
+                    return GetEnumValues<T>()[0].Value;
+                }
             }
         }
     }

@@ -10,15 +10,22 @@ namespace HomeWork.schedule
 {
     internal class SchedulesObject
     {
+        private static readonly JsonSerializerOptions options = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+        public Properties Properties { get; set; } = new Properties();
         public Subject[] Subjects { get; set; } = [];
         public Note[] Regulars { get; set; } = [];
         public List<Schedule> Schedules { get; set; } = [];
-        public Properties Properties { get; set; } = new Properties();
+        
         public static SchedulesObject? LoadJson(string filepath)
         {
             return JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
         }
-        public string ToJson() => JsonConvert.SerializeObject(this);
+        public string ToJson() => System.Text.Json.JsonSerializer.Serialize(this, options);
         public static void SaveJson(SchedulesObject json, string filepath)
         {
             File.WriteAllText(filepath, json.ToJson());
@@ -47,6 +54,10 @@ namespace HomeWork.schedule
                 if (note.Subject == subject) { notes.Add(note); }
             }
             return [.. notes];
+        }
+        public void Save()
+        {
+            Debug.WriteLine(ToJson());
         }
         public List<int>[] GetSchedules(DateTime dateStart, DateTime dateFinish)
         {
@@ -107,9 +118,9 @@ namespace HomeWork.schedule
         public string Type { get; set; } = string.Empty;
         [JsonIgnore]
         [SeIgnore]
-        public SchType? ScheduleType
+        public ScheduleType? ScheduleType
         {
-            get => ScdLevel.GetValue<SchType>(Type);
+            get => ScdLevel.GetValue<ScheduleType>(Type);
             set => Type = value.ToString()??string.Empty;
         }
         public DateTime Start { get; set; }
@@ -137,22 +148,12 @@ namespace HomeWork.schedule
         public bool IsStartOfDay() => End.Hour == 0 && End.Minute == 0 && End.Second == 0;
         public bool IsStart(DateTime date) => Start.Date == date.Date;
         public bool IsFinish(DateTime date) => End.Date == date.Date;
-        private static readonly JsonSerializerOptions options = new()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            WriteIndented = true,
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-        public string ToJson()
-        {
-            return System.Text.Json.JsonSerializer.Serialize(this, options);
-        }
         internal static string? CheckCorrect(Schedule schedule)
         {
             if (schedule.Start.CompareTo(schedule.End) > 0) return "予定の開始時刻は終了時刻より前でないといけません";
             for (int i = 0; i < schedule.Detail.Count; i++)
             {
-                if (schedule.Detail[i].CategoryType == MyEnum.Regular) {
+                if (schedule.Detail[i].CategoryType == SubmissionCategory.Regular) {
                     var pages = schedule.Detail[i].Pages;
                     if (pages == null) return $"ページが指定されていない箇所（提出物#{i}）があります。";
                     else if (pages.Count == 0) return $"提出物#{i}でページが含まれていないことは好ましくありません";
@@ -171,7 +172,7 @@ namespace HomeWork.schedule
     }
     public class Properties
     {
-        public int Int { get; set; }
+        public string Int { get; set; } = "00000000000000000000";
     }
     public class Authorizer
     {
@@ -194,9 +195,9 @@ namespace HomeWork.schedule
         public List<string>? Pages { get; set; }
         [JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public MyEnum CategoryType
+        public SubmissionCategory CategoryType
         {
-            get { return ScdLevel.GetValue<MyEnum>(Category); }
+            get { return ScdLevel.GetValue<SubmissionCategory>(Category); }
             set { Category = value.ToString(); }
         }
         public string? Share { get; set; }
@@ -240,9 +241,9 @@ namespace HomeWork.schedule
         }
         [JsonIgnore]
         [SeIgnore]
-        public Share ShareLevel
+        public ShareLevel ShareLevel
         {
-            get { return ScdLevel.GetValue<Share>(Share); }
+            get { return ScdLevel.GetValue<ShareLevel>(Share); }
             set { Share = value.ToString(); }
         }
     }
