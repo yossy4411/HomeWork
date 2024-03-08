@@ -178,7 +178,7 @@ namespace HomeWork.schedule
     {
         public static Authorizer Create(Properties properties)
         {
-            return new();
+            return new() { UserID = properties.Int };
         }
         public static Authorizer Create()
         {
