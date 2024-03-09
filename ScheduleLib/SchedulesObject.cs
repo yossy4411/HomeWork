@@ -4,11 +4,12 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using SeIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
+using System.Drawing;
 
 
-namespace HomeWork.schedule
+namespace ScheduleLib
 {
-    internal class SchedulesObject
+    public class SchedulesObject
     {
         private static readonly JsonSerializerOptions options = new()
         {
@@ -148,7 +149,7 @@ namespace HomeWork.schedule
         public bool IsStartOfDay() => End.Hour == 0 && End.Minute == 0 && End.Second == 0;
         public bool IsStart(DateTime date) => Start.Date == date.Date;
         public bool IsFinish(DateTime date) => End.Date == date.Date;
-        internal static string? CheckCorrect(Schedule schedule)
+        public static string? CheckCorrect(Schedule schedule)
         {
             if (schedule.Start.CompareTo(schedule.End) > 0) return "予定の開始時刻は終了時刻より前でないといけません";
             for (int i = 0; i < schedule.Detail.Count; i++)
@@ -165,7 +166,7 @@ namespace HomeWork.schedule
         /// Setup schedule for publishing.
         /// </summary>
         /// <param name="schedule">Value to setup</param>
-        internal static void FingerPrint(Schedule schedule, Authorizer auth) {
+        public static void FingerPrint(Schedule schedule, Authorizer auth) {
             schedule.Provided = DateTime.Now;
             schedule.Provider = auth.UserID;
         }
@@ -204,17 +205,6 @@ namespace HomeWork.schedule
 
         public bool Circling { get; set; } = false;
 
-        public Label[] PageLabel()
-        {
-            if (Pages == null)
-            {
-                return [];
-            }
-            else
-            {
-                return Pages.Select(v => new Label() { Text = v.Replace('-','～'), AutoSize = true }).ToArray();
-            }
-        }
         public static void ListToText(List<string> origin, IReadOnlyList<int> numbers)
         {
             origin.Clear();

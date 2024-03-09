@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWork", "HomeWork\HomeWork.csproj", "{0CCB4735-6940-44BA-95C8-EFCFAC23F004}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeWorkAPI", "HomeWorkAPI\HomeWorkAPI.csproj", "{17C912E3-EC60-4D6F-8638-050210D535AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWorkAPI", "HomeWorkAPI\HomeWorkAPI.csproj", "{17C912E3-EC60-4D6F-8638-050210D535AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleLib", "ScheduleLib\ScheduleLib.csproj", "{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{17C912E3-EC60-4D6F-8638-050210D535AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17C912E3-EC60-4D6F-8638-050210D535AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17C912E3-EC60-4D6F-8638-050210D535AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

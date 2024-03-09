@@ -1,17 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Data.SqlClient;
 
 namespace HomeWorkAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController(ILogger<WeatherForecastController> logger) : ControllerBase
+    public class WeatherForecastController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger = logger;
-
+        private readonly ILogger<WeatherForecastController> _logger;
+        private static readonly string connectionString = "Data Source=34.168.36.70:3306;Initial Catalog=HomeWork;Integrated Security=True;";
+        private static readonly SqlConnection connection = new(connectionString);
         private static readonly string[] Summaries = 
             [
                 "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
             ];
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        {
+            _logger = logger;
+            connection.Open();
+        }
+
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
@@ -24,9 +34,10 @@ namespace HomeWorkAPI.Controllers
             .ToArray();
         }
         [HttpPost(Name = "PostTest")]
-        public void Post(object body)
+        public IActionResult Post(string body)
         {
-            _logger.LogInformation($"{body} recieved");
+            _logger.LogInformation($"{body} Recieved (POST)");
+            return Ok(body);
         }
     }
 }

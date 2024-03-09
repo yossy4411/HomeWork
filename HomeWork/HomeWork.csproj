@@ -11,7 +11,10 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.66.0.3297" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScheduleLib\ScheduleLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,6 @@
 ﻿
-using System.ComponentModel;
-using System.Linq;
 
-namespace HomeWork.schedule
+namespace ScheduleLib
 {
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     sealed class DisplayAttribute(string japaneseDay) : Attribute

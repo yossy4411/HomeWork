@@ -6,9 +6,8 @@ using System.Windows.Forms;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
-using HomeWork.schedule;
+using ScheduleLib;
 using HomeWork.Views;
-using Newtonsoft.Json.Linq;
 
 namespace HomeWork
 {
@@ -333,7 +332,7 @@ namespace HomeWork
                                     table.AddLinkRow("提出物", note.Name ?? "[提出物を読み込めませんでした]", (sender, e) => { Debug.WriteLine("クリックされました"); });
                                 }
                                 FlowLayoutPanel pages = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true };
-                                pages.Controls.AddRange(submission.PageLabel());
+                                if(submission.Pages != null) pages.Controls.AddRange(submission.Pages.Select(o=> new Label() { Text = o }).ToArray());
 
                                 table.AddCustomRow("ページ", pages);
                                 break;
