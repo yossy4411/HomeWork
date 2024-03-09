@@ -5,7 +5,9 @@ using System.Text.Json;
 using SeIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 using System.Drawing;
-
+using System.Security.Cryptography.X509Certificates;
+using System.Runtime.CompilerServices;
+using ScheduleLib;
 
 namespace ScheduleLib
 {
@@ -21,17 +23,22 @@ namespace ScheduleLib
         public Subject[] Subjects { get; set; } = [];
         public Note[] Regulars { get; set; } = [];
         public List<Schedule> Schedules { get; set; } = [];
+        [JsonIgnore]
+        [SeIgnore]
+        string FilePath = string.Empty; 
         
         public static SchedulesObject? LoadJson(string filepath)
         {
-            return JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
+            SchedulesObject? schedules = JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
+            if(schedules != null) schedules.FilePath = filepath;
+            return schedules;
         }
         public string ToJson() => System.Text.Json.JsonSerializer.Serialize(this, options);
         public static void SaveJson(SchedulesObject json, string filepath)
         {
             File.WriteAllText(filepath, json.ToJson());
         }
-        public Subject? LoadSubject(string id)
+        public Subject? LoadSubject(string? id)
         {
             foreach (Subject subject in Subjects)
             {
@@ -47,7 +54,7 @@ namespace ScheduleLib
             }
             return null;
         }
-        public Note[] SearchRegular(string subject)
+        public Note[] SearchRegular(string? subject)
         {
             List<Note> notes = [];
             foreach (Note note in Regulars)
@@ -58,7 +65,7 @@ namespace ScheduleLib
         }
         public void Save()
         {
-            Debug.WriteLine(ToJson());
+            File.WriteAllText(FilePath, ToJson());
         }
         public List<int>[] GetSchedules(DateTime dateStart, DateTime dateFinish)
         {
@@ -103,7 +110,7 @@ namespace ScheduleLib
     {
         public string? Id { get; set; }
         public string? Name { get; set; }
-        public string? Subject { get; set; }
+        public string Subject { get; set; } = string.Empty;
         public int Pages { get; set; }
         public string? Alias { get; set; }
         public override string? ToString()
@@ -129,11 +136,11 @@ namespace ScheduleLib
         public string? Description { get; set; }
         public DateTime Provided {  get; set; }
         public string? Provider {  get; set; }
-        public string Subject { get; set; } = string.Empty;
+        public string? Subject { get; set; }
         [System.Text.Json.Serialization.JsonConverter(typeof(SubmissionParser.ColorConverter))]
         public Color Color { get; set; }
         public Color GetTextColor() => GetContrastColor(Color);
-        public List<Submission> Detail { get; set; } = [];
+        public List<Submission>? Detail { get; set; }
 
 
         static Color GetContrastColor(Color backgroundColor)
@@ -152,12 +159,16 @@ namespace ScheduleLib
         public static string? CheckCorrect(Schedule schedule)
         {
             if (schedule.Start.CompareTo(schedule.End) > 0) return "予定の開始時刻は終了時刻より前でないといけません";
-            for (int i = 0; i < schedule.Detail.Count; i++)
+            if (schedule.Detail != null)
             {
-                if (schedule.Detail[i].CategoryType == SubmissionCategory.Regular) {
-                    var pages = schedule.Detail[i].Pages;
-                    if (pages == null) return $"ページが指定されていない箇所（提出物#{i}）があります。";
-                    else if (pages.Count == 0) return $"提出物#{i}でページが含まれていないことは好ましくありません";
+                for (int i = 0; i < schedule.Detail.Count; i++)
+                {
+                    if (schedule.Detail[i].CategoryType == SubmissionCategory.Regular)
+                    {
+                        var pages = schedule.Detail[i].Pages;
+                        if (pages == null) return $"ページが指定されていない箇所（提出物#{i}）があります。";
+                        else if (pages.Count == 0) return $"提出物#{i}でページが含まれていないことは好ましくありません";
+                    }
                 }
             }
             return null;
@@ -166,9 +177,22 @@ namespace ScheduleLib
         /// Setup schedule for publishing.
         /// </summary>
         /// <param name="schedule">Value to setup</param>
-        public static void FingerPrint(Schedule schedule, Authorizer auth) {
+        public static void Finalize(Schedule schedule, Authorizer auth, bool publish = false) {
             schedule.Provided = DateTime.Now;
-            schedule.Provider = auth.UserID;
+            if (schedule.ScheduleType != ScheduleLib.ScheduleType.Homework)
+            {
+                schedule.Detail = null;
+                schedule.Subject = null;
+                
+            }
+            if (schedule.ScheduleType == ScheduleLib.ScheduleType.ShortEvent)
+            {
+                schedule.End = schedule.Start = schedule.Start.Date;
+            }
+            if (publish)
+            {
+                schedule.Provider = auth.UserID;
+            }
         }
     }
     public class Properties

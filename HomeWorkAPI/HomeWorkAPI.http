@@ -1,6 +1,6 @@
-@HomeWorkAPI_HostAddress = http://localhost:32769
+@HomeWorkAPI_HostAddress = https://localhost:32770/database
 
-GET {{HomeWorkAPI_HostAddress}}/weatherforecast/
+GET {{HomeWorkAPI_HostAddress}}/users
 Accept: application/json
 
 ###

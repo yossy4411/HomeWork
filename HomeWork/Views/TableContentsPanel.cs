@@ -18,7 +18,7 @@ namespace HomeWork.Views
         }
 
         private void AddRow(int row, string fieldname, Control control) => AddRow(row, fieldname, control, false);
-        private void AddRow(int row, string fieldname, Control control, bool fitting)
+        private Label AddRow(int row, string fieldname, Control control, bool fitting)
         {
             Label field = new() { Text = fieldname, AutoSize = true, MaximumSize = new((int)ColumnStyles[0].Width, 0), TextAlign = ContentAlignment.MiddleLeft };
             Controls.Add(field, 0, row);
@@ -29,7 +29,9 @@ namespace HomeWork.Views
             }
             
             RowCount++;
+            return field;
         }
+
         public void AddTextRow(string fieldname, string text)
         {
             AddRow(RowCount, fieldname, new Label() { Text = text, AutoSize = true });
@@ -42,6 +44,7 @@ namespace HomeWork.Views
             AddRow(RowCount, fieldname, box, true);
         }
 
+        public void AddCustomRow(string fieldname, Control control, out Label label, bool fit = false) => label = AddRow(RowCount, fieldname, control, fit);
         public void AddCustomRow(string fieldname, Control control, bool fit = false) => AddRow(RowCount, fieldname, control, fit);
 
         public void AddLinkRow(string fieldname, string linkText, EventHandler clicked)
