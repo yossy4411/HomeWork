@@ -1,6 +1,6 @@
-﻿
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScheduleLib
+namespace ScheduleLib.Schedule
 {
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     sealed class DisplayAttribute(string japaneseDay) : Attribute
@@ -40,6 +40,13 @@ namespace ScheduleLib
         [Display("修正・再提出")]
         Fix
     }
+    public enum CertType
+    {
+        [Display("検定")]
+        Certifications,
+        [Display("地位")]
+        Position
+    }
     public class ScheduleLevel<T>(T id, string name) where T : Enum
     {
         public T Value = id;
@@ -54,7 +61,7 @@ namespace ScheduleLib
         }
     }
     public class ScdLevel()
-    { 
+    {
 
         public static string GetJapaneseString(Enum day)
         {
@@ -81,12 +88,14 @@ namespace ScheduleLib
             try
             {
                 return (T)Enum.Parse(typeof(T), name);
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 try
                 {
                     return (T)Enum.ToObject(typeof(T), 0);
-                } catch (Exception)
+                }
+                catch (Exception)
                 {
                     return GetEnumValues<T>()[0].Value;
                 }

@@ -1,40 +1,33 @@
 ﻿using Newtonsoft.Json;
-using System.Diagnostics;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using SeIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 using System.Drawing;
-using System.Security.Cryptography.X509Certificates;
-using System.Runtime.CompilerServices;
-using ScheduleLib;
+using System.Diagnostics;
 
-namespace ScheduleLib
+namespace ScheduleLib.Schedule
 {
-    public class SchedulesObject
+    public class ScheduleObject
     {
-        private static readonly JsonSerializerOptions options = new()
+        private static readonly JsonSerializerSettings options = new()
         {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            WriteIndented = true,
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.Indented,
+            Converters = [new Newtonsoft.Json.Converters.StringEnumConverter()]
         };
         public Properties Properties { get; set; } = new Properties();
         public Subject[] Subjects { get; set; } = [];
         public Note[] Regulars { get; set; } = [];
         public List<Schedule> Schedules { get; set; } = [];
         [JsonIgnore]
-        [SeIgnore]
-        string FilePath = string.Empty; 
-        
-        public static SchedulesObject? LoadJson(string filepath)
+        string FilePath = string.Empty;
+
+        public static ScheduleObject? LoadJson(string filepath)
         {
-            SchedulesObject? schedules = JsonConvert.DeserializeObject<SchedulesObject>(File.ReadAllText(filepath));
-            if(schedules != null) schedules.FilePath = filepath;
+            ScheduleObject? schedules = JsonConvert.DeserializeObject<ScheduleObject>(File.ReadAllText(filepath));
+            if (schedules != null) schedules.FilePath = filepath;
             return schedules;
         }
-        public string ToJson() => System.Text.Json.JsonSerializer.Serialize(this, options);
-        public static void SaveJson(SchedulesObject json, string filepath)
+        public string ToJson() => JsonConvert.SerializeObject(this, options);
+        public static void SaveJson(ScheduleObject json, string filepath)
         {
             File.WriteAllText(filepath, json.ToJson());
         }
@@ -117,7 +110,7 @@ namespace ScheduleLib
         {
             return Name;
         }
-        public string? Type { get {  return Id?.Split('.')[1]; } }
+        public string? Type { get { return Id?.Split('.')[1]; } }
     }
     public class Schedule
     {
@@ -125,17 +118,16 @@ namespace ScheduleLib
         public string Title { get; set; } = "";
         public string Type { get; set; } = string.Empty;
         [JsonIgnore]
-        [SeIgnore]
         public ScheduleType? ScheduleType
         {
             get => ScdLevel.GetValue<ScheduleType>(Type);
-            set => Type = value.ToString()??string.Empty;
+            set => Type = value.ToString() ?? string.Empty;
         }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public string? Description { get; set; }
-        public DateTime Provided {  get; set; }
-        public string? Provider {  get; set; }
+        public DateTime Provided { get; set; }
+        public string? Provider { get; set; }
         public string? Subject { get; set; }
         [System.Text.Json.Serialization.JsonConverter(typeof(SubmissionParser.ColorConverter))]
         public Color Color { get; set; }
@@ -163,7 +155,7 @@ namespace ScheduleLib
             {
                 for (int i = 0; i < schedule.Detail.Count; i++)
                 {
-                    if (schedule.Detail[i].CategoryType == SubmissionCategory.Regular)
+                    if (schedule.Detail[i].Category == SubmissionCategory.Regular)
                     {
                         var pages = schedule.Detail[i].Pages;
                         if (pages == null) return $"ページが指定されていない箇所（提出物#{i}）があります。";
@@ -177,15 +169,17 @@ namespace ScheduleLib
         /// Setup schedule for publishing.
         /// </summary>
         /// <param name="schedule">Value to setup</param>
-        public static void Finalize(Schedule schedule, Authorizer auth, bool publish = false) {
+        public static void Finalize(Schedule schedule, Authorizer auth, bool publish = false)
+        {
+            Debug.WriteLine(schedule.Detail);
             schedule.Provided = DateTime.Now;
-            if (schedule.ScheduleType != ScheduleLib.ScheduleType.Homework)
+            if (schedule.ScheduleType != ScheduleLib.Schedule.ScheduleType.Homework)
             {
                 schedule.Detail = null;
                 schedule.Subject = null;
-                
+
             }
-            if (schedule.ScheduleType == ScheduleLib.ScheduleType.ShortEvent)
+            if (schedule.ScheduleType == ScheduleLib.Schedule.ScheduleType.ShortEvent)
             {
                 schedule.End = schedule.Start = schedule.Start.Date;
             }
@@ -197,13 +191,13 @@ namespace ScheduleLib
     }
     public class Properties
     {
-        public string Int { get; set; } = "00000000000000000000";
+        public User User { get; set; } = new User();
     }
-    public class Authorizer
+    public class Authorizer()
     {
         public static Authorizer Create(Properties properties)
         {
-            return new() { UserID = properties.Int };
+            return new() { UserID = properties.User.Id };
         }
         public static Authorizer Create()
         {
@@ -215,17 +209,11 @@ namespace ScheduleLib
     {
         public string Name { get; set; } = "提出物";
         public string? Description { get; set; }
-        public string? Category {  get; set; }
+        public SubmissionCategory Category { get; set; }
         public string Id { get; set; } = string.Empty;
         public List<string>? Pages { get; set; }
         [JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public SubmissionCategory CategoryType
-        {
-            get { return ScdLevel.GetValue<SubmissionCategory>(Category); }
-            set { Category = value.ToString(); }
-        }
-        public string? Share { get; set; }
+        public ShareLevel Share { get; set; }
 
         public bool Circling { get; set; } = false;
 
@@ -237,7 +225,7 @@ namespace ScheduleLib
                 int start = numbers[i];
                 int end = start;
 
-                while (i + 1 < numbers.Count && numbers[i+1] == end + 1)
+                while (i + 1 < numbers.Count && numbers[i + 1] == end + 1)
                 {
                     end = numbers[i + 1];
                     i++;
@@ -252,13 +240,6 @@ namespace ScheduleLib
                     origin.Add(start.ToString());
                 }
             }
-        }
-        [JsonIgnore]
-        [SeIgnore]
-        public ShareLevel ShareLevel
-        {
-            get { return ScdLevel.GetValue<ShareLevel>(Share); }
-            set { Share = value.ToString(); }
         }
     }
 }

@@ -2,7 +2,7 @@
 using HomeWork.Views;
 namespace HomeWork
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -52,11 +52,20 @@ namespace HomeWork
             addFriendMenu = new ToolStripMenuItem();
             removeFriendMenu = new ToolStripMenuItem();
             listFriendsMenu = new ToolStripMenuItem();
+            schedulesMenu = new ToolStripMenuItem();
+            addScheduleMenu = new ToolStripMenuItem();
+            editScheduleMenu = new ToolStripMenuItem();
+            deleteScheduleMenu = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
+            SearchScheduleMenu = new ToolStripMenuItem();
             feedbackMenu = new ToolStripMenuItem();
             sendFeedbackMenu = new ToolStripMenuItem();
+            SupportMenu = new ToolStripMenuItem();
             toolTip = new ToolTip(components);
             imageList1 = new ImageList(components);
             colorPicker = new ColorDialog();
+            ユーザープロフィールToolStripMenuItem = new ToolStripMenuItem();
+            ユーザープロフィールToolStripMenuItem1 = new ToolStripMenuItem();
             calendarHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nextMonth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)previousMonth).BeginInit();
@@ -215,7 +224,7 @@ namespace HomeWork
             // 
             menuStrip1.BackColor = SystemColors.Window;
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { userMenu, feedbackMenu });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { userMenu, schedulesMenu, feedbackMenu });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1022, 28);
@@ -224,7 +233,7 @@ namespace HomeWork
             // 
             // userMenu
             // 
-            userMenu.DropDownItems.AddRange(new ToolStripItem[] { userProfileMenu, userPreferencesMenu, FriendsMenu });
+            userMenu.DropDownItems.AddRange(new ToolStripItem[] { userProfileMenu, userPreferencesMenu, FriendsMenu, ユーザープロフィールToolStripMenuItem, ユーザープロフィールToolStripMenuItem1 });
             userMenu.Name = "userMenu";
             userMenu.Size = new Size(67, 24);
             userMenu.Text = "ユーザー";
@@ -232,43 +241,80 @@ namespace HomeWork
             // userProfileMenu
             // 
             userProfileMenu.Name = "userProfileMenu";
-            userProfileMenu.Size = new Size(240, 26);
-            userProfileMenu.Text = "ユーザープロフィールの表示";
+            userProfileMenu.Size = new Size(198, 26);
+            userProfileMenu.Text = "ユーザープロフィール";
+            userProfileMenu.Click += UserProfileMenu_Click;
             // 
             // userPreferencesMenu
             // 
             userPreferencesMenu.Name = "userPreferencesMenu";
-            userPreferencesMenu.Size = new Size(240, 26);
+            userPreferencesMenu.Size = new Size(198, 26);
             userPreferencesMenu.Text = "ユーザー設定";
             // 
             // FriendsMenu
             // 
             FriendsMenu.DropDownItems.AddRange(new ToolStripItem[] { addFriendMenu, removeFriendMenu, listFriendsMenu });
             FriendsMenu.Name = "FriendsMenu";
-            FriendsMenu.Size = new Size(240, 26);
+            FriendsMenu.Size = new Size(198, 26);
             FriendsMenu.Text = "フレンド";
             // 
             // addFriendMenu
             // 
             addFriendMenu.Name = "addFriendMenu";
-            addFriendMenu.Size = new Size(177, 26);
+            addFriendMenu.Size = new Size(224, 26);
             addFriendMenu.Text = "フレンドの追加";
             // 
             // removeFriendMenu
             // 
             removeFriendMenu.Name = "removeFriendMenu";
-            removeFriendMenu.Size = new Size(177, 26);
+            removeFriendMenu.Size = new Size(224, 26);
             removeFriendMenu.Text = "フレンドの解除";
             // 
             // listFriendsMenu
             // 
             listFriendsMenu.Name = "listFriendsMenu";
-            listFriendsMenu.Size = new Size(177, 26);
+            listFriendsMenu.Size = new Size(224, 26);
             listFriendsMenu.Text = "フレンド一覧";
+            // 
+            // schedulesMenu
+            // 
+            schedulesMenu.DropDownItems.AddRange(new ToolStripItem[] { addScheduleMenu, editScheduleMenu, deleteScheduleMenu, toolStripSeparator1, SearchScheduleMenu });
+            schedulesMenu.Name = "schedulesMenu";
+            schedulesMenu.Size = new Size(53, 24);
+            schedulesMenu.Text = "予定";
+            // 
+            // addScheduleMenu
+            // 
+            addScheduleMenu.Name = "addScheduleMenu";
+            addScheduleMenu.Size = new Size(224, 26);
+            addScheduleMenu.Text = "追加";
+            // 
+            // editScheduleMenu
+            // 
+            editScheduleMenu.Name = "editScheduleMenu";
+            editScheduleMenu.Size = new Size(224, 26);
+            editScheduleMenu.Text = "編集...";
+            // 
+            // deleteScheduleMenu
+            // 
+            deleteScheduleMenu.Name = "deleteScheduleMenu";
+            deleteScheduleMenu.Size = new Size(224, 26);
+            deleteScheduleMenu.Text = "削除";
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(221, 6);
+            // 
+            // SearchScheduleMenu
+            // 
+            SearchScheduleMenu.Name = "SearchScheduleMenu";
+            SearchScheduleMenu.Size = new Size(224, 26);
+            SearchScheduleMenu.Text = "検索...";
             // 
             // feedbackMenu
             // 
-            feedbackMenu.DropDownItems.AddRange(new ToolStripItem[] { sendFeedbackMenu });
+            feedbackMenu.DropDownItems.AddRange(new ToolStripItem[] { sendFeedbackMenu, SupportMenu });
             feedbackMenu.Name = "feedbackMenu";
             feedbackMenu.Size = new Size(96, 24);
             feedbackMenu.Text = "フィードバック";
@@ -276,8 +322,14 @@ namespace HomeWork
             // sendFeedbackMenu
             // 
             sendFeedbackMenu.Name = "sendFeedbackMenu";
-            sendFeedbackMenu.Size = new Size(229, 26);
-            sendFeedbackMenu.Text = "フィードバックを送信する";
+            sendFeedbackMenu.Size = new Size(238, 26);
+            sendFeedbackMenu.Text = "フィードバックを送信する...";
+            // 
+            // SupportMenu
+            // 
+            SupportMenu.Name = "SupportMenu";
+            SupportMenu.Size = new Size(238, 26);
+            SupportMenu.Text = "サポート...";
             // 
             // imageList1
             // 
@@ -285,7 +337,21 @@ namespace HomeWork
             imageList1.ImageSize = new Size(16, 16);
             imageList1.TransparentColor = Color.Transparent;
             // 
-            // Form1
+            // ユーザープロフィールToolStripMenuItem
+            // 
+            ユーザープロフィールToolStripMenuItem.Checked = true;
+            ユーザープロフィールToolStripMenuItem.CheckState = CheckState.Checked;
+            ユーザープロフィールToolStripMenuItem.Name = "ユーザープロフィールToolStripMenuItem";
+            ユーザープロフィールToolStripMenuItem.Size = new Size(198, 26);
+            ユーザープロフィールToolStripMenuItem.Text = "ユーザープロフィール";
+            // 
+            // ユーザープロフィールToolStripMenuItem1
+            // 
+            ユーザープロフィールToolStripMenuItem1.Name = "ユーザープロフィールToolStripMenuItem1";
+            ユーザープロフィールToolStripMenuItem1.Size = new Size(198, 26);
+            ユーザープロフィールToolStripMenuItem1.Text = "ユーザープロフィール";
+            // 
+            // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -294,7 +360,7 @@ namespace HomeWork
             Controls.Add(tabs);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
-            Name = "Form1";
+            Name = "MainForm";
             Text = "HomeWork";
             Load += Form1_Load_1;
             calendarHeader.ResumeLayout(false);
@@ -337,5 +403,14 @@ namespace HomeWork
         private ToolTip toolTip;
         private ImageList imageList1;
         private ColorDialog colorPicker;
+        private ToolStripMenuItem schedulesMenu;
+        private ToolStripMenuItem addScheduleMenu;
+        private ToolStripMenuItem deleteScheduleMenu;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripMenuItem SearchScheduleMenu;
+        private ToolStripMenuItem SupportMenu;
+        private ToolStripMenuItem editScheduleMenu;
+        private ToolStripMenuItem ユーザープロフィールToolStripMenuItem;
+        private ToolStripMenuItem ユーザープロフィールToolStripMenuItem1;
     }
 }

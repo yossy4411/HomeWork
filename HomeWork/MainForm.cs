@@ -6,15 +6,15 @@ using System.Windows.Forms;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
-using ScheduleLib;
 using HomeWork.Views;
 using System.DirectoryServices;
+using ScheduleLib.Schedule;
 
 namespace HomeWork
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        private readonly SchedulesObject schedules;
+        private readonly ScheduleObject schedules;
         private readonly FontFamily fontFamily = FontFamily.GenericSansSerif;
         private readonly IList<Event> holidays;
         private float scroll = 0;
@@ -23,7 +23,7 @@ namespace HomeWork
         private List<int>[]? displayingSchedules;
         private DateTime? detailDate = null;
         private readonly Authorizer authorizer;
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -57,10 +57,10 @@ namespace HomeWork
                 return (new Font(fontFamily, size), fontFamily);
             }
         }
-        private static (SchedulesObject, Authorizer) LoadFile(string path)
+        private static (ScheduleObject, Authorizer) LoadFile(string path)
         {
-            SchedulesObject? schedules = SchedulesObject.LoadJson(path);
-            return schedules != null ?(schedules, Authorizer.Create(schedules.Properties)) : (new SchedulesObject(), Authorizer.Create());
+            ScheduleObject? schedules = ScheduleObject.LoadJson(path);
+            return schedules != null ? (schedules, Authorizer.Create(schedules.Properties)) : (new ScheduleObject(), Authorizer.Create());
         }
         private static Event? SearchEvent(IList<Event> events, DateTime date)
         {
@@ -327,7 +327,7 @@ namespace HomeWork
 
                         table.AddTextRow("タイトル", submission.Name);
                         if (submission.Description != null) table.AddTextRow("説明", submission.Description);
-                        switch (submission.CategoryType)
+                        switch (submission.Category)
                         {
                             case SubmissionCategory.Regular:
                                 Note? note = schedules.LoadRegular(submission.Id);
@@ -340,7 +340,7 @@ namespace HomeWork
                                     table.AddLinkRow("提出物", note.Name ?? "[提出物を読み込めませんでした]", (sender, e) => { Debug.WriteLine("クリックされました"); });
                                 }
                                 FlowLayoutPanel pages = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true };
-                                if(submission.Pages != null) pages.Controls.AddRange(submission.Pages.Select(o=> new Label() { Text = o }).ToArray());
+                                if (submission.Pages != null) pages.Controls.AddRange(submission.Pages.Select(o => new Label() { Text = o }).ToArray());
 
                                 table.AddCustomRow("ページ", pages);
                                 break;
@@ -352,7 +352,7 @@ namespace HomeWork
                                 break;
                         }
                         table.AddTextRow("丸付け", submission.Circling ? "あり" : "なし");
-                        table.AddTextRow("公開レベル", ScdLevel.GetJapaneseString(submission.ShareLevel));
+                        table.AddTextRow("公開レベル", ScdLevel.GetJapaneseString(submission.Share));
                     }
                     break;
 
@@ -362,7 +362,7 @@ namespace HomeWork
                     tableLayoutPanel.AddTextRow("終了日", schedule.End.ToString("f"));
                     if (schedule.Description != null) tableLayoutPanel.AddTextRow("メモ", schedule.Description);
                     break;
-                    
+
             }
             tableLayoutPanel.AddTextRow("提供:", $"{schedule.Provided:G}頃\nby{schedule.Provider ?? "自分"}");
 
@@ -384,7 +384,7 @@ namespace HomeWork
                 }
             }
         }
-            
+
         private void AddSchedule(object sender, EventArgs e)
         {
             FlowLayoutPanel parent = new() { FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new(0), AutoScroll = true };
@@ -407,14 +407,14 @@ namespace HomeWork
             scheduleBox.Items.AddRange(ScdLevel.GetEnumValues<ScheduleType>());
             tableLayoutPanel.AddCustomRow("種類", scheduleBox, true);
             schedule.Title = "新しい予定";
-            tableLayoutPanel.AddTextInput("タイトル", "新しい予定", eventHandler:(sender,e)=>schedule.Title= schedule.Title = ((TextBox?)sender)?.Text??string.Empty);
-            tableLayoutPanel.AddTextInput("説明", field: true, eventHandler: (sender,e) => schedule.Description = ((TextBox?)sender)?.Text);
+            tableLayoutPanel.AddTextInput("タイトル", "新しい予定", eventHandler: (sender, e) => schedule.Title = schedule.Title = ((TextBox?)sender)?.Text ?? string.Empty);
+            tableLayoutPanel.AddTextInput("説明", field: true, eventHandler: (sender, e) => schedule.Description = ((TextBox?)sender)?.Text);
             ComboBox subjBox = new() { DropDownStyle = ComboBoxStyle.DropDownList };
             subjBox.Items.AddRange(schedules.Subjects);
             subjBox.SelectedValueChanged += (sender, e) => schedule.Subject = (((Subject?)subjBox.SelectedItem) ?? new Subject() { Name = "未指定", Id = "unknown" }).Id;
             subjBox.SelectedIndex = 0;
             tableLayoutPanel.AddCustomRow("教科", subjBox, out Label subjLabel, true);
-            Control selected = new() { Width =10,Height=10, BackColor = Color.BlueViolet};
+            Control selected = new() { Width = 10, Height = 10, BackColor = Color.BlueViolet };
             tableLayoutPanel.AddCustomRow("色", selected);
             Button colorButton = new() { Text = "編集", Height = 30 };
             schedule.Color = Color.BlueViolet;
@@ -428,14 +428,14 @@ namespace HomeWork
                 }
             };
             tableLayoutPanel.AddCustomRow("色の変更", colorButton);
-            
+
             DateTimePicker startDT = new()
             {
                 Format = DateTimePickerFormat.Short,
                 CustomFormat = "yyyy/MM/dd HH:mm:ss",
                 Width = tableLayoutPanel.ContWidth - 20,
             };
-                
+
             FlowLayoutPanel panel = new() { AutoSize = true };
             panel.Controls.Add(startDT);
             CheckBox checkbox1 = new() { Text = "終日", Checked = true };
@@ -450,7 +450,7 @@ namespace HomeWork
                 CustomFormat = "yyyy/MM/dd HH:mm:ss",
                 Width = tableLayoutPanel.ContWidth - 20,
             };
-                
+
 
             FlowLayoutPanel panel1 = new() { AutoSize = true };
             panel1.Controls.Add(finishDT);
@@ -459,13 +459,13 @@ namespace HomeWork
             CheckBox checkbox2 = new() { Text = "終日", Checked = true };
             checkbox2.CheckedChanged += (sender, e) => finishDT.Format = checkbox2.Checked ? DateTimePickerFormat.Short : DateTimePickerFormat.Custom;
             panel1.Controls.Add(checkbox2);
-            tableLayoutPanel.AddCustomRow("終了時刻", panel1, out Label finishLabel, fit:true);
-            
+            tableLayoutPanel.AddCustomRow("終了時刻", panel1, out Label finishLabel, fit: true);
+
             FlowLayoutPanel submissionsView = new() { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
             parent.Controls.Add(submissionsView);
-            AddSubmission(subjBox,submissionsView, tabPage.Width, schedule);
+            AddSubmission(subjBox, submissionsView, tabPage.Width, schedule);
             Button newSubmission = new() { Text = "新しい提出物", AutoSize = true };
-            newSubmission.Click += (sender,e) => AddSubmission(subjBox, submissionsView, tabPage.Width, schedule);
+            newSubmission.Click += (sender, e) => AddSubmission(subjBox, submissionsView, tabPage.Width, schedule);
             parent.Controls.Add(newSubmission);
             Button submitSchedule = new() { Text = "確定してカレンダーに追加", AutoSize = true };
             Label errorlabel = new() { AutoSize = true, ForeColor = Color.Red };
@@ -488,9 +488,9 @@ namespace HomeWork
             };
             parent.Controls.Add(submitSchedule);
             parent.Controls.Add(errorlabel);
-            scheduleBox.SelectedValueChanged += (sender, e) => 
+            scheduleBox.SelectedValueChanged += (sender, e) =>
             {
-                switch(schedule.ScheduleType = (ScheduleLevel<ScheduleType>?)scheduleBox.SelectedItem)
+                switch (schedule.ScheduleType = (ScheduleLevel<ScheduleType>?)scheduleBox.SelectedItem)
                 {
                     case ScheduleType.Homework:
                         subjLabel.Visible = subjBox.Visible = submissionsView.Visible = true;
@@ -514,17 +514,17 @@ namespace HomeWork
                         checkbox1.Visible = false;
                         startLabel.Text = "開始日";
                         break;
-
                 }
 
             };
             scheduleBox.SelectedIndex = addSchedule.SelectedIndex;
         }
 
-        private void AddSubmission(ComboBox subjBox,FlowLayoutPanel panel, int width, Schedule schedule)
+        private void AddSubmission(ComboBox subjBox, FlowLayoutPanel panel, int width, Schedule schedule)
         {
             Submission submission = new();
-            schedule.Detail?.Add(submission);
+            schedule.Detail = [];
+            schedule.Detail.Add(submission);
             TableContentsPanel tableLayoutPanel = new() { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowOnly, Margin = new(0) };
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.3f));
             tableLayoutPanel.ColumnStyles.Add(new(SizeType.Absolute, width * 0.7f - 35));
@@ -538,23 +538,23 @@ namespace HomeWork
                 Text = "提出物",
             };
             panel.Controls.Add(titledPanel);
-            Button remthis = new() { Text = "削除",Height=30 };
+            Button remthis = new() { Text = "削除", Height = 30 };
             remthis.Click += (sender, e) =>
             {
                 titledPanel.Dispose();
                 panel.Controls.Remove(titledPanel);
-                schedule.Detail?.Remove(submission);
+                schedule.Detail.Remove(submission);
                 GC.Collect();
             };
-            tableLayoutPanel.AddCustomRow("この提出物を", remthis, fit:true);
+            tableLayoutPanel.AddCustomRow("この提出物を", remthis, fit: true);
             ComboBox share = new() { DropDownStyle = ComboBoxStyle.DropDownList };
             share.Items.AddRange(ScdLevel.GetEnumValues<ShareLevel>());
-            share.SelectedValueChanged += (sender, e) => submission.ShareLevel = (ScheduleLevel<ShareLevel>?)share.SelectedItem;
+            share.SelectedValueChanged += (sender, e) => submission.Share = (ScheduleLevel<ShareLevel>?)share.SelectedItem;
             share.SelectedIndex = 0;
-            tableLayoutPanel.AddCustomRow("公開", share, fit:true);
+            tableLayoutPanel.AddCustomRow("公開", share, fit: true);
             tableLayoutPanel.AddTextInput("タイトル", "提出物", eventHandler: new((sender, e) => submission.Name = ((TextBox?)sender)?.Text ?? "提出物"));
             FlowLayoutPanel flowLayoutPanel = new() { AutoSize = true, Margin = new(0) };
-            ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = tableLayoutPanel.ContWidth-5 };
+            ComboBox box = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = tableLayoutPanel.ContWidth - 5 };
             box.Items.AddRange(ScdLevel.GetEnumValues<SubmissionCategory>());
             box.SelectedIndex = 0;
             flowLayoutPanel.Controls.Add(box);
@@ -564,17 +564,17 @@ namespace HomeWork
                 Checked = true
             };
             checkBox.CheckedChanged += (sender, e) => submission.Circling = checkBox.Checked;
-            
+
             flowLayoutPanel.Controls.Add(checkBox);
             tableLayoutPanel.AddCustomRow("種別", flowLayoutPanel, fit: true);
-            submission.CategoryType = SubmissionCategory.Regular;
-            EventHandler ? handler = AddRegular(schedule,submission, tableLayoutPanel);
+            submission.Category = SubmissionCategory.Regular;
+            EventHandler? handler = AddRegular(schedule, submission, tableLayoutPanel);
             subjBox.SelectedValueChanged += handler;
             box.SelectedValueChanged += (sender, e) =>
             {
                 ResetTable(tableLayoutPanel, 4);
                 subjBox.SelectedIndexChanged -= handler;
-                switch (submission.CategoryType = (ScheduleLevel<SubmissionCategory>?)box.SelectedItem)
+                switch (submission.Category = (ScheduleLevel<SubmissionCategory>?)box.SelectedItem)
                 {
                     case SubmissionCategory.Regular:
                         handler = AddRegular(schedule, submission, tableLayoutPanel);
@@ -623,7 +623,7 @@ namespace HomeWork
                 Note? note = (Note?)submiBox.SelectedItem;
                 startPage.Maximum = (note?.Pages) ?? 100;
                 endPage.Maximum = (note?.Pages) ?? 100;
-                submission.Id = note?.Id??string.Empty;
+                submission.Id = note?.Id ?? string.Empty;
             };
 
             submiBox.SelectedIndex = 0;
@@ -677,7 +677,7 @@ namespace HomeWork
                     Submission.ListToText(submission.Pages, ints);
                     flow.Controls.Add(list);
                 };
-                
+
             }
 
             return hander;
@@ -712,10 +712,11 @@ namespace HomeWork
             list.Columns.Add(new ColumnHeader() { Text = "終了日", Width = 100 });
             list.Columns.Add(new ColumnHeader() { Text = "ID", Width = 60 });
             submission.Pages ??= [];
-            AddSchedulesOnSubject(schedule.Subject??string.Empty, list);
+            AddSchedulesOnSubject(schedule.Subject ?? string.Empty, list);
             tableLayoutPanel.AddCustomRow("選択可能", list, fit: true);
             tableLayoutPanel.AddCustomRow("修正する予定", selectedList, fit: true);
-            list.DoubleClick += (sender, e) => {
+            list.DoubleClick += (sender, e) =>
+            {
                 if (ints.Contains(list.SelectedIndices[0]))
                 {
                     selectedList.Items.RemoveAt(ints.IndexOf(list.SelectedIndices[0]));
@@ -735,9 +736,9 @@ namespace HomeWork
                 list.Items.Clear();
                 ints.Clear();
                 selectedList.Items.Clear();
-                AddSchedulesOnSubject(schedule.Subject??string.Empty, list);
+                AddSchedulesOnSubject(schedule.Subject ?? string.Empty, list);
             });
-            
+
 
         }
 
