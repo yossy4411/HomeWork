@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace HomeWork
+namespace HomeWork.SettingForms
 {
-    public partial class UserForm : Form
+    public partial class NewPassword : Form
     {
-        public UserForm()
+        public NewPassword()
         {
             InitializeComponent();
         }

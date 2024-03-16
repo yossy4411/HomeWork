@@ -7,8 +7,20 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
+    
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Font\NotoSansJP-VariableFont_wght.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Font\NotoSansJP-VariableFont_wght.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.66.0.3297" />
@@ -24,6 +36,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="SettingForms\NewUsername.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -31,12 +46,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Resources\Font\NotoSansJP-VariableFont_wght.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

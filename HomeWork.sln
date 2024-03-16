@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWork", "HomeWork\HomeWo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeWorkAPI", "HomeWorkAPI\HomeWorkAPI.csproj", "{17C912E3-EC60-4D6F-8638-050210D535AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleLib", "ScheduleLib\ScheduleLib.csproj", "{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleLib", "ScheduleLib\ScheduleLib.csproj", "{9F233CBD-4C10-4D9A-BE8C-4C7D2F4FF009}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{B44B20BA-32BF-4B78-BE52-4726ABF0B288}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

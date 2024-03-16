@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace ScheduleLib.Schedule
 {
-    public class ScheduleObject
+    public partial class UserDataObject
     {
         private static readonly JsonSerializerSettings options = new()
         {
@@ -17,17 +17,18 @@ namespace ScheduleLib.Schedule
         public Subject[] Subjects { get; set; } = [];
         public Note[] Regulars { get; set; } = [];
         public List<Schedule> Schedules { get; set; } = [];
+        public List<int> Friends { get; set; } = [];
         [JsonIgnore]
         string FilePath = string.Empty;
 
-        public static ScheduleObject? LoadJson(string filepath)
+        public static UserDataObject? LoadJson(string filepath)
         {
-            ScheduleObject? schedules = JsonConvert.DeserializeObject<ScheduleObject>(File.ReadAllText(filepath));
+            UserDataObject? schedules = JsonConvert.DeserializeObject<UserDataObject>(File.ReadAllText(filepath));
             if (schedules != null) schedules.FilePath = filepath;
             return schedules;
         }
         public string ToJson() => JsonConvert.SerializeObject(this, options);
-        public static void SaveJson(ScheduleObject json, string filepath)
+        public static void SaveJson(UserDataObject json, string filepath)
         {
             File.WriteAllText(filepath, json.ToJson());
         }
@@ -127,9 +128,8 @@ namespace ScheduleLib.Schedule
         public DateTime End { get; set; }
         public string? Description { get; set; }
         public DateTime Provided { get; set; }
-        public string? Provider { get; set; }
+        public int Provider { get; set; }
         public string? Subject { get; set; }
-        [System.Text.Json.Serialization.JsonConverter(typeof(SubmissionParser.ColorConverter))]
         public Color Color { get; set; }
         public Color GetTextColor() => GetContrastColor(Color);
         public List<Submission>? Detail { get; set; }
@@ -203,7 +203,7 @@ namespace ScheduleLib.Schedule
         {
             return new();
         }
-        public string? UserID;
+        public int UserID;
     }
     public class Submission
     {

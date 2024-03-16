@@ -1,6 +1,10 @@
 @HomeWorkAPI_HostAddress = https://localhost:32768/database
 
-GET {{HomeWorkAPI_HostAddress}}/users?areacode=5250036
+GET {{HomeWorkAPI_HostAddress}}/schools/area?areacode=525003
+Accept: application/json
+###
+
+GET {{HomeWorkAPI_HostAddress}}/schools/id?id=A125320600013
 Accept: application/json
 
 ###

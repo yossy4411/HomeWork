@@ -21,8 +21,8 @@ namespace HomeWorkAPI.Controllers
             _connection.Open();
         }
 
-        [HttpGet("users")]
-        public IActionResult Get(int areacode = 0)
+        [HttpGet("schools/area")]
+        public IActionResult SearchByAreaCode(int areacode = 0)
         {
             try
             {
@@ -33,7 +33,34 @@ namespace HomeWorkAPI.Controllers
                 List<SchoolObject> values = [];
                 while (reader.Read())
                 {
-                    string post = (reader["posting_address"].ToString())?.PadLeft(7, '0')??string.Empty;
+                    string post = reader["posting_address"].ToString()?.PadLeft(7, '0')??string.Empty;
+                    values.Add(new SchoolObject
+                    {
+                        Id = (string)reader["school_id"],
+                        Name = (string)reader["school_name"],
+                        Post = post,
+                        Address = (string)reader["school_address"],
+                    });
+
+                }
+                return Ok(values);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex);
+            }
+        }
+        [HttpGet("schools/id")]
+        public IActionResult GetById(string id)
+        {
+            try
+            {
+                using MySqlCommand cmd = new($"SELECT * FROM schools WHERE school_id = '{id}';", _connection);
+                using var reader = cmd.ExecuteReader();
+                List<SchoolObject> values = [];
+                while (reader.Read())
+                {
+                    string post = reader["posting_address"].ToString()?.PadLeft(7, '0') ?? string.Empty;
                     values.Add(new SchoolObject
                     {
                         Id = (string)reader["school_id"],

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ScheduleLib
@@ -17,12 +18,19 @@ namespace ScheduleLib
     }
     public class User
     {
-        public string Id { get; set; } = "A123456789012-3-01-33";
+        public string Class { get; set; } = "A123456789012-00000";
+        public int Id { get; set; } = -1;
+        [JsonIgnore]
+        public string SchoolId
+        {
+            get => Class[..13];
+        }
         public string? Name { get; set; }
         public string? NameKana { get; set; }
         public bool Creator { get; set; } = false;
         public Proficiency[] Proficiencies { get; set; } = [];
-        public string Note { get; set; } = string.Empty;
+        public string Memo { get; set; } = string.Empty;
+        public List<string> Links { get; set; } = [];
     }
     public class Proficiency
     {
