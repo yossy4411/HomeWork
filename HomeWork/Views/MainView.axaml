@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:HomeWork.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="HomeWork.Views.MainView"
+             FontFamily=""
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+  <ScrollViewer VerticalScrollBarVisibility="Visible">
+    <StackPanel>
+      <!-- スクロール可能なコンテンツ -->
+      <TextBlock Text="Item 1"/>
+      <TextBlock Text="Item 2"/>
+      <TextBlock Text="Item 3"/>
+      <Calendar/>
+      <Calendar/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

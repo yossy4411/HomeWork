@@ -2,10 +2,14 @@
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 using System.Drawing;
 using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace ScheduleLib.Schedule
 {
-    public partial class UserDataObject
+    public abstract class ScheduleObject { }
+    public partial class UserData : ScheduleObject
     {
         private static readonly JsonSerializerSettings options = new()
         {
@@ -14,21 +18,22 @@ namespace ScheduleLib.Schedule
             Converters = [new Newtonsoft.Json.Converters.StringEnumConverter()]
         };
         public Properties Properties { get; set; } = new Properties();
+        public List<int> Friends { get; set; } = [];
         public Subject[] Subjects { get; set; } = [];
         public Note[] Regulars { get; set; } = [];
         public List<Schedule> Schedules { get; set; } = [];
-        public List<int> Friends { get; set; } = [];
+        
         [JsonIgnore]
         string FilePath = string.Empty;
 
-        public static UserDataObject? LoadJson(string filepath)
+        public static UserData? LoadJson(string filepath)
         {
-            UserDataObject? schedules = JsonConvert.DeserializeObject<UserDataObject>(File.ReadAllText(filepath));
+            UserData? schedules = JsonConvert.DeserializeObject<UserData>(File.ReadAllText(filepath));
             if (schedules != null) schedules.FilePath = filepath;
             return schedules;
         }
         public string ToJson() => JsonConvert.SerializeObject(this, options);
-        public static void SaveJson(UserDataObject json, string filepath)
+        public static void SaveJson(UserData json, string filepath)
         {
             File.WriteAllText(filepath, json.ToJson());
         }
@@ -91,7 +96,7 @@ namespace ScheduleLib.Schedule
         }
     }
 
-    public class Subject
+    public class Subject : ScheduleObject
     {
         public string Id { get; set; } = "unknown";
         public string Name { get; set; } = string.Empty;
@@ -100,7 +105,7 @@ namespace ScheduleLib.Schedule
             return Name;
         }
     }
-    public class Note
+    public class Note : ScheduleObject
     {
         public string? Id { get; set; }
         public string? Name { get; set; }
@@ -113,9 +118,9 @@ namespace ScheduleLib.Schedule
         }
         public string? Type { get { return Id?.Split('.')[1]; } }
     }
-    public class Schedule
+    public class Schedule : ScheduleObject
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = "unknown";
         public string Title { get; set; } = "";
         public string Type { get; set; } = string.Empty;
         [JsonIgnore]
@@ -172,12 +177,22 @@ namespace ScheduleLib.Schedule
         public static void Finalize(Schedule schedule, Authorizer auth, bool publish = false)
         {
             Debug.WriteLine(schedule.Detail);
-            schedule.Provided = DateTime.Now;
+            var now = DateTime.Now;
+            now.AddTicks(-now.Ticks);
+            schedule.Provided = now;
+            var nowId = now.ToString("yyyyMMdd");
+            int id = 1;
+            if (auth.scheduleIds != null)
+                foreach (var s in auth.scheduleIds)
+                {
+                    if (Convert.ToInt64(s, 16).ToString().StartsWith(nowId))
+                        id++;
+                }
+            schedule.Id = long.Parse(now.ToString("yyyyMMdd") + id).ToString("X");
             if (schedule.ScheduleType != ScheduleLib.Schedule.ScheduleType.Homework)
             {
                 schedule.Detail = null;
                 schedule.Subject = null;
-
             }
             if (schedule.ScheduleType == ScheduleLib.Schedule.ScheduleType.ShortEvent)
             {
@@ -193,17 +208,20 @@ namespace ScheduleLib.Schedule
     {
         public User User { get; set; } = new User();
     }
-    public class Authorizer()
+    public class Authorizer
     {
-        public static Authorizer Create(Properties properties)
+        private Authorizer() { }
+        public static Authorizer Create(UserData properties)
         {
-            return new() { UserID = properties.User.Id };
+            return new()
+            {
+                UserID = properties.Properties.User.Id,
+                scheduleIds = properties.Schedules.Select(s => s.Id).ToList(),
+            };
         }
-        public static Authorizer Create()
-        {
-            return new();
-        }
+        public static Authorizer Create() => new();
         public int UserID;
+        public List<string>? scheduleIds;
     }
     public class Submission
     {

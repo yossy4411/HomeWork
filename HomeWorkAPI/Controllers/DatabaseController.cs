@@ -1,87 +1,27 @@
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
-using ScheduleLib;
-using System;
-using System.Data;
-using System.Net;
-
+using System.Data.Common;
+using Newtonsoft.Json;
 namespace HomeWorkAPI.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class DatabaseController : ControllerBase
+    public abstract class DataBaseController : ControllerBase
     {
-        private readonly string _connectionString;
-        private readonly MySqlConnection _connection;
-        public DatabaseController()
+        public MySqlConnection _connection;
+        public DataBaseController(string key)
         {
-            _connectionString = "Server=34.168.36.70;Port=3306;Database=homework;User ID=homework;Password=webapi-homework;";
-            _connection = new MySqlConnection(_connectionString);
+            Auth auth = Auth.FromFile()[key];
+            
+            _connection = new MySqlConnection($"Server=34.168.36.70;Port=3306;Database={auth.Database};User ID={auth.Username};Password={auth.Password};");
             _connection.Open();
         }
-
-        [HttpGet("schools/area")]
-        public IActionResult SearchByAreaCode(int areacode = 0)
-        {
-            try
-            {
-                using MySqlCommand cmd = areacode == 0 ?
-                    new MySqlCommand($"SELECT * FROM schools;", _connection) :
-                    new MySqlCommand($"SELECT * FROM schools WHERE LPAD(posting_address, 7, '0') LIKE '{areacode}%';", _connection);
-                using var reader = cmd.ExecuteReader();
-                List<SchoolObject> values = [];
-                while (reader.Read())
-                {
-                    string post = reader["posting_address"].ToString()?.PadLeft(7, '0')??string.Empty;
-                    values.Add(new SchoolObject
-                    {
-                        Id = (string)reader["school_id"],
-                        Name = (string)reader["school_name"],
-                        Post = post,
-                        Address = (string)reader["school_address"],
-                    });
-
-                }
-                return Ok(values);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex);
-            }
-        }
-        [HttpGet("schools/id")]
-        public IActionResult GetById(string id)
-        {
-            try
-            {
-                using MySqlCommand cmd = new($"SELECT * FROM schools WHERE school_id = '{id}';", _connection);
-                using var reader = cmd.ExecuteReader();
-                List<SchoolObject> values = [];
-                while (reader.Read())
-                {
-                    string post = reader["posting_address"].ToString()?.PadLeft(7, '0') ?? string.Empty;
-                    values.Add(new SchoolObject
-                    {
-                        Id = (string)reader["school_id"],
-                        Name = (string)reader["school_name"],
-                        Post = post,
-                        Address = (string)reader["school_address"],
-                    });
-
-                }
-                return Ok(values);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex);
-            }
-        }
-
-        [HttpPost("PostTest")]
-        public IActionResult Post(string body)
-        {
-            return Ok(body + " Received!");
-        }
+    }
+    internal class Auth(string username, string password, string database)
+    {
+        public static Dictionary<string, Auth> FromFile() =>
+           JsonConvert.DeserializeObject<Dictionary<string, Auth>>(File.ReadAllText("auth.json")) ?? [];
+        public string Username { get; set; } = username;
+        public string Password { get; set; } = password;
+        public string Database { get; set; } = database;
     }
 }

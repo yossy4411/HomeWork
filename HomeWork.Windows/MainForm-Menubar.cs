@@ -20,7 +20,7 @@ namespace HomeWork
         private void UserSettingsMenu_Click(object sender, EventArgs e)
         {
             var form = new UserSettingsForm(userData.Properties.User);
-            form.ShowDialog();
+            form.Show();
         }
         private void ShowProfile(User user)
         {
@@ -32,7 +32,7 @@ namespace HomeWork
                 Image = Properties.Resources.User,
                 Size = new(150, 150),
                 SizeMode = PictureBoxSizeMode.Zoom,
-                BackColor = Color.Aquamarine
+                BackColor = Color.AliceBlue
             };
             FlowLayoutPanel controls = new()
             {

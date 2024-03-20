@@ -9,12 +9,14 @@ using Google.Apis.Services;
 using HomeWork.Views;
 using System.DirectoryServices;
 using ScheduleLib.Schedule;
+using ScheduleLib.Linq;
+using System.Collections.Generic;
 
 namespace HomeWork
 {
     public partial class MainForm : Form
     {
-        private readonly UserDataObject userData;
+        private readonly UserData userData;
         private readonly FontFamily fontFamily = FontFamily.GenericSansSerif;
         private readonly IList<Event> holidays;
         private float scroll = 0;
@@ -26,13 +28,13 @@ namespace HomeWork
         public MainForm()
         {
             InitializeComponent();
-            var service = new CalendarService(new BaseClientService.Initializer()
+            /*var service = new CalendarService(new BaseClientService.Initializer()
             {
                 ApiKey = "AIzaSyACDT2kmVWYcSNd_yS2xKSBXj71EwA5iNw",
             });
             //負荷と金がかかるので無効化中
-            holidays = service.Events.List("ja.japanese#holiday@group.v.calendar.google.com").Execute().Items;
-            //holidays = [];
+            holidays = service.Events.List("ja.japanese#holiday@group.v.calendar.google.com").Execute().Items;*/
+            holidays = [];
             (Font, FontFamily) t = LoadFontFromFile(@"Resources/Font/NotoSansJP-VariableFont_wght.ttf", 8);
             Font = t.Item1;
             fontFamily = t.Item2;
@@ -57,10 +59,10 @@ namespace HomeWork
                 return (new Font(fontFamily, size), fontFamily);
             }
         }
-        private static (UserDataObject, Authorizer) LoadFile(string path)
+        private static (UserData, Authorizer) LoadFile(string path)
         {
-            UserDataObject? schedules = UserDataObject.LoadJson(path);
-            return schedules != null ? (schedules, Authorizer.Create(schedules.Properties)) : (new UserDataObject(), Authorizer.Create());
+            UserData? schedules = UserData.LoadJson(path);
+            return schedules != null ? (schedules, Authorizer.Create(schedules)) : (new UserData(), Authorizer.Create());
         }
         private static Event? SearchEvent(IList<Event> events, DateTime date)
         {
@@ -103,7 +105,7 @@ namespace HomeWork
                     if (schedule.Description != null) tableLayoutPanel.AddTextRow("メモ", schedule.Description);
                     {
                         Subject? subj = userData.LoadSubject(schedule.Subject);
-                        tableLayoutPanel.AddTextRow("教科", subj != null ? subj.Name : "?");
+                        tableLayoutPanel.AddLinkRow("教科", subj != null ? subj.Name : "不明", (sender,e) => AddSearchedList(SearchType.Subject, subj));
                     }
                     FlowLayoutPanel accordion = new()
                     {
@@ -125,7 +127,7 @@ namespace HomeWork
                             AutoSizeMode = AutoSizeMode.GrowOnly,
                             AutoSize = true,
                         });
-                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.3f));
+                        table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.4f));
                         table.ColumnStyles.Add(new(SizeType.Absolute, tableLayoutPanel.ContWidth * 0.6f));
 
                         table.AddTextRow("タイトル", submission.Name);
@@ -142,14 +144,28 @@ namespace HomeWork
                                 {
                                     table.AddLinkRow("提出物", note.Name ?? "[提出物を読み込めませんでした]", (sender, e) => { Debug.WriteLine("クリックされました"); });
                                 }
-                                FlowLayoutPanel pages = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true };
+                                FlowLayoutPanel pages = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true, Margin = new(0) };
                                 if (submission.Pages != null) pages.Controls.AddRange(submission.Pages.Select(o => new Label() { Text = o }).ToArray());
 
                                 table.AddCustomRow("ページ", pages);
                                 break;
                             case SubmissionCategory.Irregular:
+
                                 break;
                             case SubmissionCategory.Fix:
+                                FlowLayoutPanel links = new() { FlowDirection = FlowDirection.TopDown, AutoSize = true, Margin = new(0) };
+                                if(submission.Pages != null) 
+                                    links.Controls.AddRange(submission.Pages.Select(o =>
+                                    {
+                                        Schedule? schj;
+                                        LinkLabel linkSubm = new();
+                                        if ((schj = userData.Schedules.GetSchedule(o)) != null) {
+                                            linkSubm.Text = schj.Title;
+                                            linkSubm.Click += (sender,e)=> AddTab(schj);
+                                        }
+                                        return linkSubm;
+                                    }).ToArray());
+                                table.AddCustomRow("リンク先", links);
                                 break;
                             default:
                                 break;
@@ -170,7 +186,31 @@ namespace HomeWork
             tableLayoutPanel.AddTextRow("提供:", $"{schedule.Provided:G}頃\nby{(schedule.Provider == userData.Properties.User.Id ? "自分" : schedule.Provider)}");
 
         }
-
+        private enum SearchType
+        {
+            Subject
+        }
+        private void AddSearchedList(SearchType type,ScheduleObject? schedule)
+        {
+            TabPage tab = new();
+            FlowLayoutPanel flowLayout = new() { FlowDirection = FlowDirection.TopDown };
+            tab.Controls.Add(flowLayout);
+            tabs.Controls.Add(tab);
+            flowLayout.Controls.Add(new Button() { Text = "閉じる", AutoSize = true, Margin = new(0) });
+            ListView list = new();
+            list.Columns.Add(new ColumnHeader() { Text = "名前", Width = 200 });
+            list.Columns.Add(new ColumnHeader() { Text = "開始日", Width = 100 });
+            list.Columns.Add(new ColumnHeader() { Text = "終了日", Width = 100 });
+            list.Columns.Add(new ColumnHeader() { Text = "ID", Width = 120 });
+            flowLayout.Controls.Add(list);
+            switch (type)
+            {
+                
+                case SearchType.Subject:
+                    AddSchedulesOnSubject(((Subject?)schedule)?.Id??string.Empty, list);
+                    break;
+            }
+        }
         //目盛りの部分
         private void DetailTime_Paint(object sender, PaintEventArgs e)
         {
@@ -516,7 +556,7 @@ namespace HomeWork
             list.Columns.Add(new ColumnHeader() { Text = "ID", Width = 60 });
             submission.Pages ??= [];
             AddSchedulesOnSubject(schedule.Subject ?? string.Empty, list);
-            tableLayoutPanel.AddCustomRow("選択可能", list, fit: true);
+            tableLayoutPanel.AddCustomRow("選択可能\n（ダブルクリックで追加／削除）", list, fit: true);
             tableLayoutPanel.AddCustomRow("修正する予定", selectedList, fit: true);
             list.DoubleClick += (sender, e) =>
             {

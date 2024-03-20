@@ -50,10 +50,15 @@
             label1 = new Label();
             changePictureButton = new Button();
             userPicture = new PictureBox();
+            tabcontrol = new TabControl();
+            userPage = new TabPage();
+            tabPage1 = new TabPage();
             groupBox2.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)userPicture).BeginInit();
+            tabcontrol.SuspendLayout();
+            userPage.SuspendLayout();
             SuspendLayout();
             // 
             // openFileDialog1
@@ -71,7 +76,7 @@
             groupBox2.Controls.Add(学校);
             groupBox2.Controls.Add(changeSchool);
             groupBox2.Controls.Add(label5);
-            groupBox2.Location = new Point(283, 12);
+            groupBox2.Location = new Point(256, 6);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(332, 177);
             groupBox2.TabIndex = 6;
@@ -117,7 +122,7 @@
             // 
             lastnamekana.Location = new Point(163, 0);
             lastnamekana.Name = "lastnamekana";
-            lastnamekana.Size = new Size(154, 23);
+            lastnamekana.Size = new Size(154, 17);
             lastnamekana.TabIndex = 1;
             lastnamekana.Text = "たろう";
             lastnamekana.TextAlign = ContentAlignment.MiddleCenter;
@@ -126,25 +131,25 @@
             // 
             firstnamekana.Location = new Point(3, 0);
             firstnamekana.Name = "firstnamekana";
-            firstnamekana.Size = new Size(154, 23);
+            firstnamekana.Size = new Size(154, 17);
             firstnamekana.TabIndex = 0;
             firstnamekana.Text = "しゅくだい";
             firstnamekana.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // firstname
             // 
-            firstname.Location = new Point(3, 23);
+            firstname.Location = new Point(3, 17);
             firstname.Name = "firstname";
-            firstname.Size = new Size(154, 56);
+            firstname.Size = new Size(154, 33);
             firstname.TabIndex = 3;
             firstname.Text = "宿題";
             firstname.TextAlign = ContentAlignment.TopCenter;
             // 
             // lastname
             // 
-            lastname.Location = new Point(163, 23);
+            lastname.Location = new Point(163, 17);
             lastname.Name = "lastname";
-            lastname.Size = new Size(154, 56);
+            lastname.Size = new Size(154, 33);
             lastname.TabIndex = 2;
             lastname.Text = "太郎";
             lastname.TextAlign = ContentAlignment.TopCenter;
@@ -194,7 +199,7 @@
             groupBox1.Controls.Add(label2);
             groupBox1.Controls.Add(changeUsername);
             groupBox1.Controls.Add(label1);
-            groupBox1.Location = new Point(283, 193);
+            groupBox1.Location = new Point(256, 188);
             groupBox1.Margin = new Padding(4, 2, 4, 2);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(4, 2, 4, 2);
@@ -262,7 +267,7 @@
             // 
             // changePictureButton
             // 
-            changePictureButton.Location = new Point(12, 193);
+            changePictureButton.Location = new Point(4, 185);
             changePictureButton.Margin = new Padding(4, 2, 4, 2);
             changePictureButton.Name = "changePictureButton";
             changePictureButton.Size = new Size(187, 25);
@@ -274,7 +279,7 @@
             // userPicture
             // 
             userPicture.Image = Properties.Resources.User;
-            userPicture.Location = new Point(12, 13);
+            userPicture.Location = new Point(4, 5);
             userPicture.Margin = new Padding(4, 2, 4, 2);
             userPicture.Name = "userPicture";
             userPicture.Size = new Size(187, 176);
@@ -282,22 +287,58 @@
             userPicture.TabIndex = 0;
             userPicture.TabStop = false;
             // 
+            // tabcontrol
+            // 
+            tabcontrol.Controls.Add(userPage);
+            tabcontrol.Controls.Add(tabPage1);
+            tabcontrol.Location = new Point(12, 12);
+            tabcontrol.Name = "tabcontrol";
+            tabcontrol.SelectedIndex = 0;
+            tabcontrol.Size = new Size(602, 316);
+            tabcontrol.TabIndex = 7;
+            // 
+            // userPage
+            // 
+            userPage.Controls.Add(userPicture);
+            userPage.Controls.Add(groupBox2);
+            userPage.Controls.Add(changePictureButton);
+            userPage.Controls.Add(groupBox1);
+            userPage.Location = new Point(4, 24);
+            userPage.Name = "userPage";
+            userPage.Padding = new Padding(3);
+            userPage.Size = new Size(594, 288);
+            userPage.TabIndex = 1;
+            userPage.Text = "ユーザー";
+            userPage.UseVisualStyleBackColor = true;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(594, 288);
+            tabPage1.TabIndex = 2;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
             // UserSettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(626, 294);
-            Controls.Add(groupBox2);
-            Controls.Add(groupBox1);
-            Controls.Add(changePictureButton);
-            Controls.Add(userPicture);
+            AutoSize = true;
+            ClientSize = new Size(622, 336);
+            Controls.Add(tabcontrol);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Margin = new Padding(4, 2, 4, 2);
+            MaximizeBox = false;
             Name = "UserSettingsForm";
-            Text = "UserForm";
+            Text = "設定";
             groupBox2.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)userPicture).EndInit();
+            tabcontrol.ResumeLayout(false);
+            userPage.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -325,5 +366,8 @@
         private Label label1;
         private Button changePictureButton;
         private PictureBox userPicture;
+        private TabControl tabcontrol;
+        private TabPage userPage;
+        private TabPage tabPage1;
     }
 }

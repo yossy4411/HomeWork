@@ -11,6 +11,14 @@ namespace HomeWork
         {
             InitializeComponent();
             Load += UserSettingsForm_Load;
+            var name = me.Name?.Split(' ');
+            var namekana = me.NameKana?.Split(' ');
+            firstname.Text = name?[0];
+            lastname.Text = name?[1];
+            firstnamekana.Text = namekana?[0];
+            lastnamekana.Text = namekana?[1];
+            using var font = new Font(Font.FontFamily, 15, FontStyle.Bold);
+            firstname.Font = lastname.Font = font;
         }
 
         private void UserSettingsForm_Load(object? sender, EventArgs e)
@@ -21,13 +29,14 @@ namespace HomeWork
 
         private void UserPicture_Paint(object? sender, PaintEventArgs e)
         {
-            PictureBox pictureBox = ((PictureBox?)sender) ?? new();
-
+            PictureBox pictureBox = userPicture;
+            pictureBox.Height = pictureBox.Width;
+            pictureBox.BackColor = Color.AliceBlue;
             // Bitmapの描画オブジェクトを取得します
             Graphics g = e.Graphics;
             // 円形のパスを作成します
             using GraphicsPath path = new();
-            path.AddEllipse(0, 0, pictureBox.Height, pictureBox.Height);
+            path.AddEllipse(0, 0, pictureBox.Width, pictureBox.Height);
 
             // パスを反転させます
             Region region = new(new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));

@@ -1,4 +1,4 @@
-@HomeWorkAPI_HostAddress = https://localhost:32768/database
+@HomeWorkAPI_HostAddress = https://localhost:32780
 
 GET {{HomeWorkAPI_HostAddress}}/schools/area?areacode=525003
 Accept: application/json
@@ -6,5 +6,7 @@ Accept: application/json
 
 GET {{HomeWorkAPI_HostAddress}}/schools/id?id=A125320600013
 Accept: application/json
+###
 
+PUT {{HomeWorkAPI_HostAddress}}/user/create?username=ab&password=0
 ###
