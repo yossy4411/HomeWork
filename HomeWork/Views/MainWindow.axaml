@@ -20,13 +20,13 @@
         <MenuItem Header="Paste"/>
       </MenuItem>
     </Menu>
-    <TabControl>
-      <TabItem Header="Calendar" VerticalContentAlignment="Center">
+    <TabControl TabStripPlacement="Left">
+      <TabItem Header="Home" VerticalContentAlignment="Center">
         <views:MainView />
       </TabItem>
-      <TabItem Header="Schedules">
+      <TabItem Header="Calendar">
       </TabItem>
-      <TabItem Header="">
+      <TabItem Header="Schedules">
       </TabItem>
     </TabControl>
   </DockPanel>
