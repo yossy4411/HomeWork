@@ -1,11 +1,8 @@
 ﻿using Newtonsoft.Json;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
-using System.Drawing;
 using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-
+using System.Drawing;
+using SColor = System.Drawing.Color;
 namespace ScheduleLib.Schedule
 {
     public abstract class ScheduleObject { }
@@ -135,18 +132,21 @@ namespace ScheduleLib.Schedule
         public DateTime Provided { get; set; }
         public int Provider { get; set; }
         public string? Subject { get; set; }
-        public Color Color { get; set; }
-        public Color GetTextColor() => GetContrastColor(Color);
+        public string Color { get; set; } = "#000000";
+        [JsonIgnore]
+        public SColor SystemColor { get => ColorTranslator.FromHtml(Color); set => Color = ColorTranslator.ToHtml(value); }
+        
+        public SColor GetTextColor() => GetContrastColor(SystemColor);
         public List<Submission>? Detail { get; set; }
 
 
-        static Color GetContrastColor(Color backgroundColor)
+        static SColor GetContrastColor(SColor backgroundColor)
         {
             // 色の輝度を計算 (RGB to YIQ)
             double brightness = (0.299 * backgroundColor.R + 0.587 * backgroundColor.G + 0.114 * backgroundColor.B) / 255;
 
             // コントラスト比に基づいて白または黒を選択
-            return brightness > 0.5 ? Color.Black : Color.White;
+            return brightness > 0.5 ? SColor.Black : SColor.White;
         }
         public float GetStartRatio(DateTime date) => date.Day == Start.Day ? (Start.Hour + Start.Minute / 60f) / 24f : 0;
         public float GetFinishRatio(DateTime date) => date.Day == End.Day && !IsStartOfDay() ? (End.Hour + End.Minute / 60f) / 24f : 1;

@@ -45,7 +45,8 @@ namespace HomeWorkAPI.Controllers
         {
             try
             {
-                using MySqlCommand cmd = new($"SELECT * FROM schools WHERE posting_address LIKE '{areacode}%';", _connection);
+                using MySqlCommand cmd = new($"SELECT * FROM schools WHERE posting_address LIKE @Areacode", _connection);
+                cmd.Parameters.AddWithValue("@areacode", areacode+"%");
                 using var reader = cmd.ExecuteReader();
                 List<SchoolObject> values = [];
                 while (reader.Read())
@@ -71,7 +72,8 @@ namespace HomeWorkAPI.Controllers
         {
             try
             {
-                using MySqlCommand cmd = new($"SELECT * FROM schools WHERE school_id = '{id}';", _connection);
+                using MySqlCommand cmd = new($"SELECT * FROM schools WHERE school_id = @Id", _connection);
+                cmd.Parameters.AddWithValue("id", id);
                 using var reader = cmd.ExecuteReader();
                 if (reader.Read())
                     return Ok(

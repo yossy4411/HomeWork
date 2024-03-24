@@ -8,27 +8,5 @@
         x:Class="HomeWork.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="HomeWork">
-  <DockPanel>
-    <Menu DockPanel.Dock="Top">
-      <MenuItem Header="_File">
-        <MenuItem Header="_Open..."/>
-        <Separator/>
-        <MenuItem Header="_Exit"/>
-      </MenuItem>
-      <MenuItem Header="_Edit">
-        <MenuItem Header="Copy"/>
-        <MenuItem Header="Paste"/>
-      </MenuItem>
-    </Menu>
-    <TabControl TabStripPlacement="Left">
-      <TabItem Header="Home" VerticalContentAlignment="Center">
         <views:MainView />
-      </TabItem>
-      <TabItem Header="Calendar">
-      </TabItem>
-      <TabItem Header="Schedules">
-      </TabItem>
-    </TabControl>
-  </DockPanel>
-        
 </Window>

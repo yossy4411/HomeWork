@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Google.Protobuf.Collections;
+using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using ScheduleLib;
 using System.Data;
@@ -37,27 +38,51 @@ namespace HomeWorkAPI.Controllers
             var hash = SHA256.HashData(buffer);
             return Convert.ToBase64String(hash);
         }
-        [HttpPut("create")]
-        public ActionResult CreateUser(string username, string password)
+        [HttpGet("exists/{username}")]
+        public async Task<bool> Exists(string username)
         {
-            var salt = GenerateSalt();
-            var hash = GeneratePasswordHash(password, salt);
-            MySqlTransaction? trans = null;
+            bool exists;
+            using var command = new MySqlCommand("SELECT COUNT(*) FROM users WHERE UserName = @User", _connection);
             try
             {
-                using var cmd = new MySqlCommand("INSERT INTO users (UserName, PasswordHash, Salt) VALUES (@User, @Hash, @Salt);", _connection);
-                cmd.Parameters.AddWithValue("@User", username);
-                cmd.Parameters.AddWithValue("@Hash", hash);
-                cmd.Parameters.AddWithValue("@Salt", salt);
-                if (cmd.ExecuteNonQuery() > 0)
-                    return Ok();
-                else
-                    return StatusCode(409);
+                command.Parameters.AddWithValue("@User", username);
+                var count = await command.ExecuteScalarAsync();
+                exists = Convert.ToInt32(count) > 0;
             }
-            catch (Exception ex)
+            catch
             {
-                trans?.Rollback();
-                return StatusCode(500, ex);
+                exists = true;
+            }
+            return exists;
+        }
+        [HttpPut("create")]
+        public async Task<ActionResult> CreateUser(string username, string password)
+        {
+            var exist = await Exists(username);
+            if (exist)
+            {
+                var salt = GenerateSalt();
+                var hash = GeneratePasswordHash(password, salt);
+                try
+                {
+                    using var cmd = new MySqlCommand("INSERT INTO users (UserName, PasswordHash, Salt) VALUES (@User, @Hash, @Salt)", _connection);
+                    cmd.Parameters.AddWithValue("@User", username);
+                    cmd.Parameters.AddWithValue("@Hash", hash);
+                    cmd.Parameters.AddWithValue("@Salt", salt);
+                    if (cmd.ExecuteNonQuery() > 0)
+                        return Ok();
+                    else
+                        return BadRequest();
+
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex);
+                }
+            }
+            else
+            {
+                return BadRequest("The specified user already exists");
             }
         }
 
