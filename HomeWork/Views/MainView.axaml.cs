@@ -87,7 +87,7 @@ public partial class MainView : UserControl
                     Canvas.SetTop(shape, 20);
                     
                     panel.Children.Add(shape);
-                    if (!schedules[Math.Max(0, i2 - 1)]?.Contains(index) ?? true)
+                    if (i2 == 0 || (!schedules[i2 - 1]?.Contains(index) ?? true))
                     {
                         var text = new TextBlock()
                         {

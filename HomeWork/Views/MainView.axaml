@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:HomeWork.ViewModels"
+             xmlns:views="clr-namespace:HomeWork.Views;assembly=HomeWork"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="HomeWork.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -11,10 +12,11 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
+  <ScrollViewer>
     <StackPanel>
       
       <TextBlock Text="yyyy年MM月 のカレンダー"/>
-        <Grid Name="calendar" Height="350">
+        <Grid Name="calendar" Height="350" >
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
@@ -33,6 +35,9 @@
             <RowDefinition Height="*" />
           </Grid.RowDefinitions>
         </Grid>
-      <TextBlock Text="{Binding Greeting}"/>
+        
+        <views:SchedulesListView Margin="0,10,0,0" Height="200"/>
+
       </StackPanel>
+  </ScrollViewer>
 </UserControl>
