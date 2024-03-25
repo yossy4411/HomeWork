@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:HomeWork.ViewModels"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
+             x:Class="HomeWork.Views.SidePanel"
+             x:DataType="vm:SidePanelModel"
+             Padding="5">
+  <UserControl.DataContext>
+    <vm:SidePanelModel/>
+  </UserControl.DataContext>
+  <DockPanel>
+    <Button DockPanel.Dock="Bottom"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Center"
+            Command="{Binding Submit}">
+      Add Item
+    </Button>
+    <Grid RowDefinitions="Auto">
+      <Grid.Styles>
+        <Style Selector="TextBlock">
+          <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+      </Grid.Styles>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition MaxWidth="200"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Row="0" Grid.Column="0">
+        Wh-aii
+      </TextBlock>
+      <TextBox Grid.Row="0" Grid.Column="1"/>
+    </Grid>
+  </DockPanel>
+</UserControl>

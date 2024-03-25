@@ -11,8 +11,6 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
-  <SplitView DisplayMode="CompactInline" IsPaneOpen="True" PanePlacement="Right">
-    <SplitView.Content>
     <StackPanel>
       
       <TextBlock Text="yyyy年MM月 のカレンダー"/>
@@ -37,12 +35,4 @@
         </Grid>
       <TextBlock Text="{Binding Greeting}"/>
       </StackPanel>
-      
-    </SplitView.Content>
-    <SplitView.Pane>
-      <StackPanel>
-        <TextBlock Text="このスペースは何ですか？" FontFamily="{Binding FontFamily}"/>
-      </StackPanel>
-    </SplitView.Pane>
-  </SplitView>
 </UserControl>

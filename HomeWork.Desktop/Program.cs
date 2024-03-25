@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Avalonia;
+using Avalonia.Media;
 using Avalonia.ReactiveUI;
 
 namespace HomeWork.Desktop;
@@ -20,5 +21,6 @@ class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
+        
             .UseReactiveUI();
 }

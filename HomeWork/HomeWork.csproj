@@ -12,7 +12,29 @@
 
   
   <ItemGroup>
-    <None Remove="Assets\NotoSansJP-VariableFont_wght.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-Black.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-Bold.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-ExtraBold.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-Light.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-Medium.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-Regular.ttf" />
+    <None Remove="Assets\Fonts\MPLUSRounded1c-Thin.ttf" />
+    <None Remove="Assets\Fonts\Nunito-Black.ttf" />
+    <None Remove="Assets\Fonts\Nunito-BlackItalic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-Bold.ttf" />
+    <None Remove="Assets\Fonts\Nunito-BoldItalic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-ExtraBold.ttf" />
+    <None Remove="Assets\Fonts\Nunito-ExtraBoldItalic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-ExtraLight.ttf" />
+    <None Remove="Assets\Fonts\Nunito-ExtraLightItalic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-Italic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-Light.ttf" />
+    <None Remove="Assets\Fonts\Nunito-LightItalic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-Medium.ttf" />
+    <None Remove="Assets\Fonts\Nunito-MediumItalic.ttf" />
+    <None Remove="Assets\Fonts\Nunito-Regular.ttf" />
+    <None Remove="Assets\Fonts\Nunito-SemiBold.ttf" />
+    <None Remove="Assets\Fonts\Nunito-SemiBoldItalic.ttf" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,6 +7,19 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="HomeWork.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
+        FontFamily="{StaticResource NotoSansJP}"
         Title="HomeWork">
-        <views:MainView />
+  <SplitView DisplayMode="CompactInline" IsPaneOpen="True" PanePlacement="Right">
+    <SplitView.Pane>
+      <views:SidePanel />
+    </SplitView.Pane>
+    <SplitView.Content>
+      <TabControl>
+        <TabItem Header="カレンダー" >
+          <views:MainView />
+        </TabItem>
+      </TabControl>
+    </SplitView.Content>
+  </SplitView>
+  
 </Window>

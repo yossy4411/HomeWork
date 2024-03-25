@@ -13,6 +13,7 @@ using Avalonia.Data;
 using ScheduleLib.Schedule;
 using HomeWork.Converter;
 using Avalonia.Controls.Primitives;
+using ReactiveUI;
 
 namespace HomeWork.Views;
 
@@ -31,7 +32,7 @@ public partial class MainView : UserControl
     {
         var dateOnly = dispMonth.AddDays(-(int)dispMonth.DayOfWeek);
         var schedules = uData.GetSchedules(dateOnly.ToDateTime(time), dateOnly.AddDays(43).ToDateTime(time));
-        
+        var brush = new SolidColorBrush(Colors.Black);
         for (int i = 0; i < 42; i++)
         {
             Canvas panel = new()
@@ -39,15 +40,23 @@ public partial class MainView : UserControl
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
-
+            Rectangle rect = new() { Stroke = brush, StrokeThickness = .2, Fill = Background };
+            
+            rect.PointerPressed += (sender, e) => Debug.WriteLine("huh");
             Grid.SetRow(panel, i / 7);
             Grid.SetColumn(panel, i % 7);
-            TextBlock textBox = new() { Text = dateOnly.AddDays(i).Day.ToString() };
-            panel.Children.Add(textBox);
+            TextBlock textBlock = new() { Text = dateOnly.AddDays(i).Day.ToString() };
+            panel.Children.Add(textBlock);
+            Canvas.SetLeft(textBlock, 5);
             calendar.Children.Add(panel);
             int i2 = i;
+            
+            panel.Children.Add(rect);
+            rect.Bind(WidthProperty, new Binding("Bounds.Width") { Source = panel });
+            rect.Bind(HeightProperty, new Binding("Bounds.Height") { Source = panel });
             panel.Loaded += (sender, e) =>
             {
+
                 for (int i3 = 0; i3 < schedules[i2]?.Count; i3++)
                 {
                     int j = i3;
@@ -56,12 +65,13 @@ public partial class MainView : UserControl
                     var next = schedules[i2 + 1] == null ? 0 : schedules[i2 + 1].Contains(index) ? schedules[i2 + 1].IndexOf(index) : schedules[i2 + 1].Count - 1;
 
                     Polygon shape = new() { Fill = new SolidColorBrush(schedule.SystemColor.ToAvaloniaColor()) };
-                    if (j == schedules[i2]?.Count - 1 && schedules[i2 + 1] != null && !schedules[i2 + 1].Contains(index))
+                    if (j == schedules[i2]?.Count - 1 && (schedules[i2 + 1] == null || !schedules[i2 + 1].Contains(index)))
                     {
-                        shape.Points = [new(0, j * 9), new(0, (j + 1) * 9), new(panel.Bounds.Width, (next + 1) * 9 + 3), new(panel.Bounds.Width, (next + 1) * 9)];
+                        if (!schedules[i2 + 1]?.Contains(index)??false) next++;
+                        shape.Points = [new(0, j * 9), new(0, (j + 1) * 9), new(panel.Bounds.Width * 0.9, (next + 1) * 9), new(panel.Bounds.Width, next * 9 + 4.5), new(panel.Bounds.Width * 0.9, next * 9) ];
                         panel.SizeChanged += (sender, e) =>
                         {
-                            shape.Points = [new(0, j * 9), new(0, (j + 1) * 9), new(panel.Bounds.Width, (next + 1) * 9 + 3), new(panel.Bounds.Width, (next + 1) * 9)];
+                            shape.Points = [new(0, j * 9), new(0, (j + 1) * 9), new(panel.Bounds.Width * 0.9, (next + 1) * 9), new(panel.Bounds.Width, next * 9 + 4.5), new(panel.Bounds.Width * 0.9, next * 9)];
                         };
                     }
                     else
@@ -72,6 +82,8 @@ public partial class MainView : UserControl
                             shape.Points = [new(0, j * 9), new(0, (j + 1) * 9), new(panel.Bounds.Width, (next + 1) * 9), new(panel.Bounds.Width, next * 9)];
                         };
                     }
+                    
+                    
                     Canvas.SetTop(shape, 20);
                     
                     panel.Children.Add(shape);
@@ -91,6 +103,7 @@ public partial class MainView : UserControl
                     
                 }
             };
+            
         }
     }
 }
